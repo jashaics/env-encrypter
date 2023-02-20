@@ -1,6 +1,6 @@
 <?php
 
-namespace Tnfdam\EnvEncrypter\Console\Commands;
+namespace Jviscuso\EnvEncrypter\Console\Commands;
 
 trait EncryptionTrait {
 

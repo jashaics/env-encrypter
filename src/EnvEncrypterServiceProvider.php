@@ -1,10 +1,10 @@
 <?php
 
-namespace Tnfdam\EnvEncrypter;
+namespace Jviscuso\EnvEncrypter;
 
 use Illuminate\Support\ServiceProvider;
-use Tnfdam\EnvEncrypter\Console\Commands\Encrypt;
-use Tnfdam\EnvEncrypter\Console\Commands\Decrypt;
+use Jviscuso\EnvEncrypter\Console\Commands\Encrypt;
+use Jviscuso\EnvEncrypter\Console\Commands\Decrypt;
 
 
 

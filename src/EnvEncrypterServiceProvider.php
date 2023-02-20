@@ -3,10 +3,8 @@
 namespace Jviscuso\EnvEncrypter;
 
 use Illuminate\Support\ServiceProvider;
-use Jviscuso\EnvEncrypter\Console\Commands\Encrypt;
 use Jviscuso\EnvEncrypter\Console\Commands\Decrypt;
-
-
+use Jviscuso\EnvEncrypter\Console\Commands\Encrypt;
 
 class EnvEncrypterServiceProvider extends ServiceProvider
 {

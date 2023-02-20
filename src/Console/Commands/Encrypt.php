@@ -9,7 +9,6 @@ use Illuminate\Console\Command;
  */
 class Encrypt extends Command
 {
-
     use EncryptionTrait;
 
     /**
@@ -33,7 +32,6 @@ class Encrypt extends Command
 
     /**
      * Action been performing
-     * @var string
      */
     protected string $action = 'encrypt';
 
@@ -58,7 +56,7 @@ class Encrypt extends Command
         $sourcefilename = $this->defineClearFilename($this->option('source'));
 
         // setting destination filename
-        $destinationfilename = $this->defineEncryptedFilename($this->option('destination'),$sourcefilename);
+        $destinationfilename = $this->defineEncryptedFilename($this->option('destination'), $sourcefilename);
 
         // setting key
         $key = $this->defineKey($this->option('key'));
@@ -69,26 +67,26 @@ class Encrypt extends Command
         // creating a backup of source file
         $backup = null;
         $k = 0;
-        while(null === $backup){
+        while (null === $backup) {
             $backup = $sourcefilename.($k++ > 0 ? $k : '').'.backup';
-            if(file_exists($backup)){
+            if (file_exists($backup)) {
                 $backup = null;
             }
         }
         file_put_contents($backup, $data, LOCK_EX);
 
-        $encryptedData = $this->encryptData($data,$key);
-        
-        if(false === $encryptedData){
+        $encryptedData = $this->encryptData($data, $key);
+
+        if (false === $encryptedData) {
             $this->error(__('env-encrypter::errors.encryption_fail'));
             exit;
         }
 
         // encrypting content: if everything works fine deleting backup
-        if(file_put_contents($destinationfilename, $encryptedData, LOCK_EX)){
+        if (file_put_contents($destinationfilename, $encryptedData, LOCK_EX)) {
             unlink($backup);
-        };
+        }
 
-        $this->info(__('env-encrypter::questions.'.$this->action.'.conclusion',['source' => $sourcefilename,'destination' => $destinationfilename]));
+        $this->info(__('env-encrypter::questions.'.$this->action.'.conclusion', ['source' => $sourcefilename, 'destination' => $destinationfilename]));
     }
 }

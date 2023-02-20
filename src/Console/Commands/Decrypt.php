@@ -9,7 +9,6 @@ use Illuminate\Console\Command;
  */
 class Decrypt extends Command
 {
-
     use EncryptionTrait;
 
     /**
@@ -33,7 +32,6 @@ class Decrypt extends Command
 
     /**
      * Action been performing
-     * @var string
      */
     protected string $action = 'decrypt';
 
@@ -58,7 +56,7 @@ class Decrypt extends Command
         $sourcefilename = $this->defineEncryptedFilename($this->option('source'));
 
         // setting destination filename
-        $destinationfilename = $this->defineClearFilename($this->option('destination'),$sourcefilename);
+        $destinationfilename = $this->defineClearFilename($this->option('destination'), $sourcefilename);
 
         // setting key
         $key = $this->defineKey($this->option('key'));
@@ -66,9 +64,9 @@ class Decrypt extends Command
         // fetching file content
         $data = file_get_contents($sourcefilename);
 
-        $decryptedData = $this->decryptData($data,$key);
-        
-        if(false === $decryptedData){
+        $decryptedData = $this->decryptData($data, $key);
+
+        if (false === $decryptedData) {
             $this->error(__('env-encrypter::errors.decryption_fail'));
             exit;
         }
@@ -76,6 +74,6 @@ class Decrypt extends Command
         // encrypting content: if everything works fine deleting backup
         file_put_contents($destinationfilename, $decryptedData, LOCK_EX);
 
-        $this->info(__('env-encrypter::questions.'.$this->action.'.conclusion',['source' => $sourcefilename,'destination' => $destinationfilename]));
+        $this->info(__('env-encrypter::questions.'.$this->action.'.conclusion', ['source' => $sourcefilename, 'destination' => $destinationfilename]));
     }
 }

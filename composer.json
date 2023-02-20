@@ -1,0 +1,44 @@
+{
+    "name": "tnfdam/env-encrypter",
+    "description": "This package encrypts the desired env file and makes in available for versioning and eventually decrypt through github actions on deployment",
+    "version": "0.1",
+    "require": {
+        "php": "^8.1",
+        "illuminate/support": "^8.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.0"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Tnfdam\\EnvEncrypter\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tnfdam\\EnvEncrypter\\Tests\\": "tests"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Tnfdam\\EnvEncrypter\\EnvEncrypterServiceProvider"
+            ]
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit",
+        "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
+    },
+    "config": {
+        "sort-packages": true
+    },   
+    "authors": [
+        {
+            "name": "Jacopo Viscuso",
+            "email": "jacopo.viscuso@basecampstudio.it"
+        }
+    ],
+    "minimum-stability": "stable"
+}

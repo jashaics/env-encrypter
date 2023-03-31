@@ -42,5 +42,5 @@
             "email": "me@jacopoviscuso.it"
         }
     ],
-    "minimum-stability": "stable"
+    "minimum-stability": "alpha"
 }

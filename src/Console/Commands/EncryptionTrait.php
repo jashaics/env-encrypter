@@ -1,6 +1,6 @@
 <?php
 
-namespace Jviscuso\EnvEncrypter\Console\Commands;
+namespace Jashaics\EnvEncrypter\Console\Commands;
 
 trait EncryptionTrait
 {

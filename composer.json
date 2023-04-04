@@ -1,6 +1,6 @@
 {
-    "name": "jviscuso/env-encrypter",
-    "description": "This package encrypts the desired env file and makes in available for versioning and eventually decrypt through github actions on deployment",
+    "name": "jashaics/env-encrypter",
+    "description": "Simple .env file encrypter for Laravel. Through this package is possible to encrypt/decrypt the desired env file and make it available for versioning; decryption is especially useful on deployment through github actions",
     "version": "0.1",
     "require": {
         "php": "^8.1",
@@ -14,18 +14,18 @@
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "Jviscuso\\EnvEncrypter\\": "src"
+            "Jashaics\\EnvEncrypter\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Jviscuso\\EnvEncrypter\\Tests\\": "tests"
+            "Jashaics\\EnvEncrypter\\Tests\\": "tests"
         }
     },
     "extra": {
         "laravel": {
             "providers": [
-                "Jviscuso\\EnvEncrypter\\EnvEncrypterServiceProvider"
+                "Jashaics\\EnvEncrypter\\EnvEncrypterServiceProvider"
             ]
         }
     },

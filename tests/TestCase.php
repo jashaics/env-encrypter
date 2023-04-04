@@ -1,8 +1,8 @@
 <?php
 
-namespace Jviscuso\EnvEncrypter\Tests;
+namespace Jashaics\EnvEncrypter\Tests;
 
-use Jviscuso\EnvEncrypter\EnvEncrypterServiceProvider;
+use Jashaics\EnvEncrypter\EnvEncrypterServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
 
 abstract class TestCase extends Orchestra

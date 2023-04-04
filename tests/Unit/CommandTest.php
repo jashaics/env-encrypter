@@ -4,7 +4,7 @@ namespace Tests\Unit;
 
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
-use Jviscuso\EnvEncrypter\Tests\TestCase;
+use Jashaics\EnvEncrypter\Tests\TestCase;
 
 class CommandTest extends TestCase
 {

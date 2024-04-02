@@ -1,10 +1,21 @@
 {
     "name": "jashaics/env-encrypter",
-    "description": "Simple .env file encrypter for Laravel. Through this package is possible to encrypt/decrypt the desired env file and make it available for versioning; decryption is especially useful on deployment through github actions",
-    "version": "0.1",
+    "description": "Simple .env file encrypter for Laravel. Through this package it is possible to encrypt/decrypt the desired env file and make it available for versioning; decryption is especially useful on deployment",
+    "keywords": [
+        "laravel",
+        "env",
+        "encrypt",
+        "decrypt",
+        "encryption",
+        "decryption",
+        "env file",
+        "env encrypt",
+        "env decrypt"
+    ],
+    "type": "library",
     "require": {
-        "php": "^8.1",
-        "illuminate/support": "^8.0"
+        "php": "^8.1|^8.2",
+        "laravel/laravel": "^8.0|^9.0|^10.0|^11.0"
     },
     "require-dev": {
         "laravel/pint": "^1.5",

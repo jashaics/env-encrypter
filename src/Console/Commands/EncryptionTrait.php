@@ -2,6 +2,11 @@
 
 namespace Jashaics\EnvEncrypter\Console\Commands;
 
+/**
+ * Common methods for encryption and decryption
+ * 
+ * @author Jacopo Viscuso <me@jacopoviscuso.it>
+ */
 trait EncryptionTrait
 {
     /**

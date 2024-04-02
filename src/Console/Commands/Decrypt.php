@@ -5,7 +5,9 @@ namespace Jashaics\EnvEncrypter\Console\Commands;
 use Illuminate\Console\Command;
 
 /**
- * Delete old records from dw export archives
+ * Decrypts the given source file to the destination file using the given key
+ * 
+ * @author Jacopo Viscuso <me@jacopoviscuso.it>
  */
 class Decrypt extends Command
 {

@@ -5,7 +5,9 @@ namespace Jashaics\EnvEncrypter\Console\Commands;
 use Illuminate\Console\Command;
 
 /**
- * Delete old records from dw export archives
+ * Encrypts the given file using the given key to a given file name with ".encrypted" extention; i.e.: .env.production source file can be encrypted to .env.prod.encrypted
+ * 
+ * @author Jacopo Viscuso <me@jacopoviscuso.it>
  */
 class Encrypt extends Command
 {

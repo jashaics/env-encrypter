@@ -47,12 +47,11 @@
     },
     "config": {
         "sort-packages": true
-    },   
+    },
     "authors": [
         {
             "name": "Jacopo Viscuso",
             "email": "me@jacopoviscuso.it"
         }
-    ],
-    "minimum-stability": "alpha"
+    ]
 }

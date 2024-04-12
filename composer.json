@@ -1,6 +1,7 @@
 {
     "name": "jashaics/env-encrypter",
     "description": "Simple .env file encrypter for Laravel. Through this package it is possible to encrypt/decrypt the desired env file and make it available for versioning; decryption is especially useful on deployment",
+    "license": "MIT",
     "keywords": [
         "laravel",
         "env",
@@ -13,16 +14,17 @@
         "env decrypt"
     ],
     "type": "library",
+    "authors": [
+        {
+            "name": "Jacopo Viscuso",
+            "email": "jacopo.viscuso@gmail.com",
+            "role": "Developer"
+        }
+    ],
     "require": {
-        "php": "^8.1|^8.2",
-        "guzzlehttp/psr7": "^2.4.5"
+        "php": "^8.1",
+        "illuminate/support": "^11.3"
     },
-    "require-dev": {
-        "laravel/pint": "^1.5",
-        "orchestra/testbench": "^6.0",
-        "phpunit/phpunit": "^9.0"
-    },
-    "license": "MIT",
     "autoload": {
         "psr-4": {
             "Jashaics\\EnvEncrypter\\": "src"
@@ -41,16 +43,31 @@
         }
     },
     "scripts": {
-        "test": "vendor/bin/phpunit",
-        "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
+        "test": "./vendor/bin/pest",
+        "fix": "./vendor/bin/pint",
+        "check": "./vendor/bin/pint --test -v",
+        "static": "./vendor/bin/phpstan analyse",
+        "all": [
+            "@test",
+            "@fix",
+            "@check",
+            "@static"
+        ]
     },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
     "config": {
-        "sort-packages": true
-    },
-    "authors": [
-        {
-            "name": "Jacopo Viscuso",
-            "email": "me@jacopoviscuso.it"
+        "sort-packages": true,
+        "preferred-install": "dist",
+        "optimize-autoloader": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
         }
-    ]
+    },
+    "require-dev": {
+        "laravel/pint": "^1.15",
+        "orchestra/testbench": "^9.0",
+        "pestphp/pest": "^2.34",
+        "phpstan/phpstan": "^1.10"
+    }
 }

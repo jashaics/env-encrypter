@@ -1,6 +1,3 @@
-/node_modules
-/storage/*.key
-.env
-.env.*
 /vendor
-.phpunit.result.cache
+composer.lock
+/node_modules

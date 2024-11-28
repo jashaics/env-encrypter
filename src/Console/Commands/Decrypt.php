@@ -33,12 +33,14 @@ class Decrypt extends Command
     protected $description = 'decrypts the given source file to the destination file using the given key';
 
     /**
-     * Action been performing
+     * Action to perform
+     * 
+     * @var string
      */
     protected string $action = 'decrypt';
 
     /**
-     * Create a new job instance.
+     * Create a new command instance.
      *
      * @return void
      */
@@ -48,7 +50,7 @@ class Decrypt extends Command
     }
 
     /**
-     * Execute the job.
+     * Execute the command.
      *
      * @return void
      */

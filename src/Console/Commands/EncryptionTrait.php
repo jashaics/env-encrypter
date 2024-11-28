@@ -10,14 +10,18 @@ namespace Jashaics\EnvEncrypter\Console\Commands;
 trait EncryptionTrait
 {
     /**
-     * Minimum length for encryption key
+     * Minimum encryption key length
+     * 
+     * @var int
      */
     protected int $min_key_length = 20;
 
     /**
-     * Validates source file name
+     * Defining a proper filename
      *
      * @param ?string
+     * @param string
+     * @return string valid filename
      */
     protected function defineClearFilename(?string $filename, string $encryptedFileName = null): string
     {
@@ -77,11 +81,13 @@ trait EncryptionTrait
     }
 
     /**
-     * Validates encrypted file name
+     * Defining a proper encrypted filename
      *
      * @param ?string
+     * @param ?string
+     * @return string valid filename
      */
-    protected function defineEncryptedFilename(?string $filename, string $clearFileName = null): string
+    protected function defineEncryptedFilename(?string $filename, ?string $clearFileName = null): string
     {
         $valid = true;
         $filename = $filename ?? null;
@@ -139,7 +145,7 @@ trait EncryptionTrait
     }
 
     /**
-     * Validates key
+     * Defining a proper encryption key
      *
      * @param  string  $key
      * @return string valid key
@@ -184,6 +190,13 @@ trait EncryptionTrait
         return base64_encode($iv.$encrypted);
     }
 
+    /**
+     * Decrypting data
+     * 
+     * @param string $encryptedData
+     * @param string $key
+     * @return string decrypted data
+     */
     protected function decryptData(string $encryptedData, string $key)
     {
         $cipher = 'aes-256-cbc';
@@ -200,13 +213,14 @@ trait EncryptionTrait
     }
 
     /**
-     * FUNZIONI DI VALIDAZIONE
+     * VALIDATION
      */
 
     /**
-     * a name has been set?
+     * A name has been set?
      *
      * @param string
+     * @return bool
      */
     private function hasName(?string $filename): bool
     {
@@ -218,6 +232,7 @@ trait EncryptionTrait
      * Only letters, numbers, . (max 1 in a row), -, _ are allowed
      *
      * @param string
+     * @return bool
      */
     private function hasforbiddenCharacters(string $filename): bool
     {
@@ -231,9 +246,10 @@ trait EncryptionTrait
     }
 
     /**
-     * the name contains .env?
+     * Does the name contains .env?
      *
      * @param string
+     * @return bool
      */
     private function hasEnvInName(string $filename): bool
     {
@@ -247,10 +263,11 @@ trait EncryptionTrait
     }
 
     /**
-     * the file exists?
+     * Does the file exists?
      *
      * @param string
      * @param bool show errors?
+     * @return bool
      */
     private function hasFile(string $filename, bool $dont_show_error = false): bool
     {
@@ -266,9 +283,10 @@ trait EncryptionTrait
     }
 
     /**
-     * the name starts with dot (hidden file)
+     * Does the name starts with dot (hidden file)
      *
      * @param string
+     * @return bool
      */
     private function startsWithDot(string $filename): bool
     {

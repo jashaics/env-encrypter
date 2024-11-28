@@ -33,12 +33,14 @@ class Encrypt extends Command
     protected $description = 'Encrypts the given file using the given key to a given file name with ".encrypted" extention; i.e.: .env.production source file can be encrypted to .env.prod.encrypted';
 
     /**
-     * Action been performing
+     * Action to perform
+     * 
+     * @var string
      */
     protected string $action = 'encrypt';
 
     /**
-     * Create a new job instance.
+     * Create a new command instance.
      *
      * @return void
      */
@@ -48,7 +50,7 @@ class Encrypt extends Command
     }
 
     /**
-     * Execute the job.
+     * Execute the command.
      *
      * @return void
      */

@@ -11,7 +11,7 @@ class EnvEncrypterServiceProvider extends ServiceProvider
     /**
      * Bootstrap the application services.
      */
-    public function boot(\Illuminate\Routing\Router $router)
+    public function boot()
     {
         /*
          * Optional methods to load your package assets
@@ -31,8 +31,6 @@ class EnvEncrypterServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        // Automatically apply the package configuration
-        // $this->mergeConfigFrom(__DIR__ . '/../config/config.php', 'env-encrypter');
         parent::register();
     }
 }

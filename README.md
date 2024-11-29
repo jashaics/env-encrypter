@@ -6,16 +6,41 @@ Moreover using automatic deployment you can decrypt the .env file on the server 
 
 ## Installation
 
+In your `composer.json`, append to the `repositories` array the following:
+
+```json
+    {
+        "type": "vcs",
+        "url": "https://github.com/jashaics/env-encrypter.git"
+    }
+```
+
+If you don't have a `repositories` array, create one like this:
+```json
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/jashaics/env-encrypter.git"
+        }
+    ]
+```
+
+Then run the following command:
+
 ```
 composer require jashaics/env-encrypter
 ```
 
 ## Usage
 
-### Encrypt .env file
+### Encrypt file
+
+To encrypt your .env file run
 
 ```php artisan env-encrypter:encrypt``` then follow the instructions
 
-### Decrypt .env file
+### Decrypt file
+
+To decrypt an encrypted .env file (`.env.encrypted`) run
 
 ```php artisan env-encrypter:decrypt``` then follow the instructions

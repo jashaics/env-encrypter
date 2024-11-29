@@ -9,4 +9,5 @@ return [
     'key_min_length' => 'The key must be at least :minlength characters long',
     'encryption_fail' => 'An error occurred while encrypting data.',
     'decryption_fail' => 'An error occurred while decrypting data.',
+    'prompted_for_file_name' => 'Please provide a new file name',
 ];

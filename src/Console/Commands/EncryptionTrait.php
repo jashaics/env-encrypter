@@ -2,6 +2,14 @@
 
 namespace Jashaics\EnvEncrypter\Console\Commands;
 
+use function Laravel\Prompts\alert;
+use function Laravel\Prompts\confirm;
+use function Laravel\Prompts\error;
+use function Laravel\Prompts\info;
+use function Laravel\Prompts\password;
+use function Laravel\Prompts\suggest;
+use Illuminate\Support\Str;
+
 /**
  * Common methods for encryption and decryption
  * 
@@ -20,10 +28,10 @@ trait EncryptionTrait
      * Defining a proper filename
      *
      * @param ?string
-     * @param string
+     * @param ?string
      * @return string valid filename
      */
-    protected function defineClearFilename(?string $filename, string $encryptedFileName = null): string
+    protected function defineClearFilename(?string $filename, ?string $encryptedFileName = null): string
     {
         // by default filename is valid
         $valid = true;
@@ -62,7 +70,7 @@ trait EncryptionTrait
 
                     // if there is already an encrypted file with same filename ask for overwriting
                     if (! $valid && (! app()->isProduction() || ! $this->options('force'))) {
-                        $valid = (bool) $this->confirm(__('env-encrypter::questions.'.$this->action.'.overwrite_file', ['filename' => $filename]));
+                        $valid = (bool) confirm(__('env-encrypter::questions.'.$this->action.'.overwrite_file', ['filename' => $filename]));
                     }
                     break;
             }
@@ -72,11 +80,28 @@ trait EncryptionTrait
         if (true === $valid) {
             return $filename;
         } else {
-            $response = (bool) $encryptedFileName
-                        ? $this->anticipate(__('env-encrypter::questions.'.$this->action.'.clear_filename'), [preg_replace('/\.encrypted$/', '', $encryptedFileName)])
-                        : $this->anticipate(__('env-encrypter::questions.'.$this->action.'.clear_filename'), ['.env']);
+            $clearFileName = (bool) $encryptedFileName
+                        // setting the name of the file after decryption
+                        ? suggest(
+                            label: __('env-encrypter::questions.'.$this->action.'.clear_filename'),
+                            options: [preg_replace('/\.encrypted$/', '', $encryptedFileName)]
+                        )
+                        // setting the name of the file to encrypt
+                        : suggest(
+                            label: __('env-encrypter::questions.'.$this->action.'.clear_filename'),
+                            options: function($value){
+                                // getting files .env in the root directory
+                                return collect(glob('./.e*'))->map(fn ($file) => basename($file))->filter(fn ($file) => Str::contains($file, $value, ignoreCase: true));
+                            },
+                            transform: fn (string $value) => ! $this->startsWithDot($value) ? '.'.$value : $value,
+                            validate: fn($value) => match(true) {
+                                preg_match('/[^\w\d\.\-_]+|\.{2,}/', $value) => __('env-encrypter::errors.characters_not_allowed'),
+                                ! preg_match('/\.env/', $value) => __('env-encrypter::errors.filename'),
+                                default => null
+                            }
+                        );
 
-            return $this->defineClearFilename($response, $encryptedFileName);
+            return $this->defineClearFilename($clearFileName, $encryptedFileName);
         }
     }
 
@@ -127,7 +152,11 @@ trait EncryptionTrait
 
                     // if there is already an encrypted file with same filename ask for overwriting
                     if (! $valid && (! app()->isProduction() || ! $this->options('force'))) {
-                        $valid = (bool) $this->confirm(__('env-encrypter::questions.'.$this->action.'.overwrite_file', ['filename' => $filename]));
+                        $valid = (bool) confirm(__('env-encrypter::questions.'.$this->action.'.overwrite_file', ['filename' => $filename]));
+
+                        if(false === $valid) {
+                            alert(__('env-encrypter::errors.prompted_for_file_name'));
+                        }
                     }
                     break;
             }
@@ -137,8 +166,19 @@ trait EncryptionTrait
             return $filename;
         } else {
             $response = (bool) $clearFileName
-                        ? $this->anticipate(__('env-encrypter::questions.'.$this->action.'.encrypted_filename'), [$clearFileName.'.encrypted'])
-                        : $this->anticipate(__('env-encrypter::questions.'.$this->action.'.encrypted_filename'), ['.env.encrypted']);
+                        // setting the name of the file after encryption
+                        ? suggest(
+                            label: __('env-encrypter::questions.'.$this->action.'.encrypted_filename'),
+                            options: [$clearFileName.'.encrypted']
+                        )
+                        // setting the name of the file to decrypt
+                        : suggest(
+                            label: __('env-encrypter::questions.'.$this->action.'.encrypted_filename'),
+                            options: function($value){
+                                // getting files .env in the root directory
+                                return collect(glob('./.e*.encrypted'))->map(fn ($file) => basename($file))->filter(fn ($file) => Str::contains($file, $value, ignoreCase: true));
+                            },
+                        );                        
 
             return $this->defineEncryptedFilename($response, $clearFileName);
         }
@@ -159,7 +199,7 @@ trait EncryptionTrait
 
         if ($valid === true && $this->action === 'encrypt') {
             if (! strlen($key) >= $this->min_key_length) {
-                $this->error(__('env-encrypter::errors.key_min_length', ['minlength' => $this->min_key_length]));
+                error(__('env-encrypter::errors.key_min_length', ['minlength' => $this->min_key_length]));
                 $valid = false;
             }
             $valid = strlen($key) > $this->min_key_length;
@@ -168,7 +208,10 @@ trait EncryptionTrait
         if (true === $valid) {
             return $key;
         } else {
-            return $this->defineKey($this->secret(__('env-encrypter::questions.'.$this->action.'.key', ['minlength' => $this->min_key_length])));
+            return $this->defineKey(password(
+                label: __('env-encrypter::questions.'.$this->action.'.key', ['minlength' => $this->min_key_length]),
+                validate: ['password' => 'min:'.$this->min_key_length]
+            ));
         }
     }
 
@@ -237,7 +280,7 @@ trait EncryptionTrait
     private function hasforbiddenCharacters(string $filename): bool
     {
         if (preg_match('/[^\w\d\.\-_]+|\.{2,}/', $filename)) {
-            $this->error(__('env-encrypter::errors.characters_not_allowed'));
+            error(__('env-encrypter::errors.characters_not_allowed'));
 
             return false;
         }
@@ -254,7 +297,7 @@ trait EncryptionTrait
     private function hasEnvInName(string $filename): bool
     {
         if (! preg_match('/\.env/', $filename)) {
-            $this->error(__('env-encrypter::errors.filename'));
+            error(__('env-encrypter::errors.filename'));
 
             return false;
         }
@@ -273,7 +316,7 @@ trait EncryptionTrait
     {
         if (! file_exists($filename)) {
             if ($dont_show_error !== true) {
-                $this->error(__('env-encrypter::errors.file_not_found', ['name' => $filename]));
+                error(__('env-encrypter::errors.file_not_found', ['name' => $filename]));
             }
 
             return false;
@@ -291,7 +334,7 @@ trait EncryptionTrait
     private function startsWithDot(string $filename): bool
     {
         if (! preg_match('/^\./', $filename)) {
-            $this->info(__('env-encrypter::errors.must_start_with_dot'));
+            info(__('env-encrypter::errors.must_start_with_dot'));
         }
 
         return true;

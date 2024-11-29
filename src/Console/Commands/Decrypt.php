@@ -2,6 +2,8 @@
 
 namespace Jashaics\EnvEncrypter\Console\Commands;
 
+use function Laravel\Prompts\error;
+use function Laravel\Prompts\info;
 use Illuminate\Console\Command;
 
 /**
@@ -71,13 +73,13 @@ class Decrypt extends Command
         $decryptedData = $this->decryptData($data, $key);
 
         if (false === $decryptedData) {
-            $this->error(__('env-encrypter::errors.decryption_fail'));
+            error(__('env-encrypter::errors.decryption_fail'));
             exit;
         }
 
         // encrypting content: if everything works fine deleting backup
         file_put_contents($destinationfilename, $decryptedData, LOCK_EX);
 
-        $this->info(__('env-encrypter::questions.'.$this->action.'.conclusion', ['source' => $sourcefilename, 'destination' => $destinationfilename]));
+        info(__('env-encrypter::questions.'.$this->action.'.conclusion', ['source' => $sourcefilename, 'destination' => $destinationfilename]));
     }
 }

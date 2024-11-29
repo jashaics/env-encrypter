@@ -2,6 +2,8 @@
 
 namespace Jashaics\EnvEncrypter\Console\Commands;
 
+use function Laravel\Prompts\error;
+use function Laravel\Prompts\info;
 use Illuminate\Console\Command;
 
 /**
@@ -82,7 +84,7 @@ class Encrypt extends Command
         $encryptedData = $this->encryptData($data, $key);
 
         if (false === $encryptedData) {
-            $this->error(__('env-encrypter::errors.encryption_fail'));
+            error(__('env-encrypter::errors.encryption_fail'));
             exit;
         }
 
@@ -91,6 +93,6 @@ class Encrypt extends Command
             unlink($backup);
         }
 
-        $this->info(__('env-encrypter::questions.'.$this->action.'.conclusion', ['source' => $sourcefilename, 'destination' => $destinationfilename]));
+        info(__('env-encrypter::questions.'.$this->action.'.conclusion', ['source' => $sourcefilename, 'destination' => $destinationfilename]));
     }
 }

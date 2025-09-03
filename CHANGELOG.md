@@ -1,3 +1,21 @@
+# [2.0.0](https://github.com/jashaics/env-encrypter/compare/v1.2.0...v2.0.0) (2025-09-03)
+
+
+### Bug Fixes
+
+* :bug: Fixed missing validation logic ([6f517a3](https://github.com/jashaics/env-encrypter/commit/6f517a3243e46728ac269a1573eeb55375daa19e))
+* :bug: Fixed password length validation mismatch ([5672290](https://github.com/jashaics/env-encrypter/commit/5672290877ff234560f2d61103096baffcec005a))
+
+
+### Build System
+
+* **composer:** :arrow_up: Changed laravel/laravel to illuminate/console and illuminate/support ([8848950](https://github.com/jashaics/env-encrypter/commit/8848950ab5833c25eb9fc12cb0257805627e7213))
+
+
+### BREAKING CHANGES
+
+* **composer:** Changed dependency from laravel/laravel to illuminate/console and illuminate/support
+
 # [1.2.0](https://github.com/jashaics/env-encrypter/compare/v1.1.0...v1.2.0) (2025-07-31)
 
 

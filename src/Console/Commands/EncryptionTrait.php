@@ -187,7 +187,7 @@ trait EncryptionTrait
     /**
      * Defining a proper encryption key
      *
-     * @param  string  $key
+     * @param  ?string  $key
      * @return string valid key
      */
     protected function defineKey(?string $key): string
@@ -198,11 +198,10 @@ trait EncryptionTrait
         $valid = $this->hasName($key);
 
         if ($valid === true && $this->action === 'encrypt') {
-            if (! strlen($key) >= $this->min_key_length) {
+            $valid = strlen($key) >= $this->min_key_length;
+            if (! $valid) {
                 error(__('env-encrypter::errors.key_min_length', ['minlength' => $this->min_key_length]));
-                $valid = false;
             }
-            $valid = strlen($key) > $this->min_key_length;
         }
 
         if (true === $valid) {
@@ -240,7 +239,7 @@ trait EncryptionTrait
      * @param string $key
      * @return string decrypted data
      */
-    protected function decryptData(string $encryptedData, string $key)
+    protected function decryptData(string $encryptedData, string $key): string
     {
         $cipher = 'aes-256-cbc';
 

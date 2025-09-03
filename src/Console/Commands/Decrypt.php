@@ -2,13 +2,14 @@
 
 namespace Jashaics\EnvEncrypter\Console\Commands;
 
+use Illuminate\Console\Command;
+
 use function Laravel\Prompts\error;
 use function Laravel\Prompts\info;
-use Illuminate\Console\Command;
 
 /**
  * Decrypts the given source file to the destination file using the given key
- * 
+ *
  * @author Jacopo Viscuso <me@jacopoviscuso.it>
  */
 class Decrypt extends Command
@@ -36,8 +37,6 @@ class Decrypt extends Command
 
     /**
      * Action to perform
-     * 
-     * @var string
      */
     protected string $action = 'decrypt';
 
@@ -72,7 +71,7 @@ class Decrypt extends Command
 
         $decryptedData = $this->decryptData($data, $key);
 
-        if (false === $decryptedData) {
+        if ($decryptedData === false) {
             error(__('env-encrypter::errors.decryption_fail'));
             exit;
         }

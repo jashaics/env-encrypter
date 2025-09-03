@@ -1,4 +1,5 @@
 <?php
+
 use Jashaics\EnvEncrypter\Tests\PackageTestCase;
 
 /*

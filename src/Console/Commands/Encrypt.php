@@ -2,13 +2,14 @@
 
 namespace Jashaics\EnvEncrypter\Console\Commands;
 
+use Illuminate\Console\Command;
+
 use function Laravel\Prompts\error;
 use function Laravel\Prompts\info;
-use Illuminate\Console\Command;
 
 /**
  * Encrypts the given file using the given key to a given file name with ".encrypted" extention; i.e.: .env.production source file can be encrypted to .env.prod.encrypted
- * 
+ *
  * @author Jacopo Viscuso <me@jacopoviscuso.it>
  */
 class Encrypt extends Command
@@ -36,8 +37,6 @@ class Encrypt extends Command
 
     /**
      * Action to perform
-     * 
-     * @var string
      */
     protected string $action = 'encrypt';
 
@@ -73,7 +72,7 @@ class Encrypt extends Command
         // creating a backup of source file
         $backup = null;
         $k = 0;
-        while (null === $backup) {
+        while ($backup === null) {
             $backup = $sourcefilename.($k++ > 0 ? $k : '').'.backup';
             if (file_exists($backup)) {
                 $backup = null;
@@ -83,7 +82,7 @@ class Encrypt extends Command
 
         $encryptedData = $this->encryptData($data, $key);
 
-        if (false === $encryptedData) {
+        if ($encryptedData === false) {
             error(__('env-encrypter::errors.encryption_fail'));
             exit;
         }

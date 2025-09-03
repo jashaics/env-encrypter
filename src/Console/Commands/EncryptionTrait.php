@@ -2,25 +2,23 @@
 
 namespace Jashaics\EnvEncrypter\Console\Commands;
 
+use Illuminate\Support\Str;
+
 use function Laravel\Prompts\alert;
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\error;
-use function Laravel\Prompts\info;
 use function Laravel\Prompts\password;
 use function Laravel\Prompts\suggest;
-use Illuminate\Support\Str;
 
 /**
  * Common methods for encryption and decryption
- * 
+ *
  * @author Jacopo Viscuso <me@jacopoviscuso.it>
  */
 trait EncryptionTrait
 {
     /**
      * Minimum encryption key length
-     * 
-     * @var int
      */
     protected int $min_key_length = 20;
 
@@ -43,24 +41,24 @@ trait EncryptionTrait
         $valid = $this->hasName($filename);
 
         // checking for forbidden characters
-        if (true === $valid) {
+        if ($valid === true) {
             $valid = $this->hasforbiddenCharacters($filename);
         }
 
         // checking if source file has valid name
-        if (true === $valid) {
+        if ($valid === true) {
             $valid = $this->hasEnvInName($filename);
         }
 
         // checking if source file starts with dot
-        if (true === $valid) {
+        if ($valid === true) {
             if (! $this->startsWithDot($filename)) {
                 $filename = '.'.$filename;
             }
         }
 
-        if (true === $valid) {
-            switch($this->action) {
+        if ($valid === true) {
+            switch ($this->action) {
                 case 'encrypt':
                     $valid = $this->hasFile($filename);
                     break;
@@ -77,7 +75,7 @@ trait EncryptionTrait
         }
 
         // if everything is ok return filename, otherwise ask for filename again
-        if (true === $valid) {
+        if ($valid === true) {
             return $filename;
         } else {
             $clearFileName = (bool) $encryptedFileName
@@ -89,12 +87,12 @@ trait EncryptionTrait
                         // setting the name of the file to encrypt
                         : suggest(
                             label: __('env-encrypter::questions.'.$this->action.'.clear_filename'),
-                            options: function($value){
+                            options: function ($value) {
                                 // getting files .env in the root directory
                                 return collect(glob('./.e*'))->map(fn ($file) => basename($file))->filter(fn ($file) => Str::contains($file, $value, ignoreCase: true));
                             },
                             transform: fn (string $value) => ! $this->startsWithDot($value) ? '.'.$value : $value,
-                            validate: fn($value) => match(true) {
+                            validate: fn ($value) => match (true) {
                                 preg_match('/[^\w\d\.\-_]+|\.{2,}/', $value) => __('env-encrypter::errors.characters_not_allowed'),
                                 ! preg_match('/\.env/', $value) => __('env-encrypter::errors.filename'),
                                 default => null
@@ -125,24 +123,24 @@ trait EncryptionTrait
         }
 
         // verifico se ha caratteri non validi
-        if (true === $valid) {
+        if ($valid === true) {
             $valid = $this->hasforbiddenCharacters($filename);
         }
 
         // verifico se contiene env come nome file
-        if (true === $valid) {
+        if ($valid === true) {
             $valid = $this->hasEnvInName($filename);
         }
 
         // verifico se inizia con il .
-        if (true === $valid) {
+        if ($valid === true) {
             if (! $this->startsWithDot($filename)) {
                 $filename = '.'.$filename;
             }
         }
 
-        if (true === $valid) {
-            switch($this->action) {
+        if ($valid === true) {
+            switch ($this->action) {
                 case 'decrypt':
                     $valid = $this->hasFile($filename);
                     break;
@@ -154,7 +152,7 @@ trait EncryptionTrait
                     if (! $valid && (! app()->isProduction() || ! $this->options('force'))) {
                         $valid = (bool) confirm(__('env-encrypter::questions.'.$this->action.'.overwrite_file', ['filename' => $filename]));
 
-                        if(false === $valid) {
+                        if ($valid === false) {
                             alert(__('env-encrypter::errors.prompted_for_file_name'));
                         }
                     }
@@ -162,7 +160,7 @@ trait EncryptionTrait
             }
         }
 
-        if (true === $valid) {
+        if ($valid === true) {
             return $filename;
         } else {
             $response = (bool) $clearFileName
@@ -174,11 +172,11 @@ trait EncryptionTrait
                         // setting the name of the file to decrypt
                         : suggest(
                             label: __('env-encrypter::questions.'.$this->action.'.encrypted_filename'),
-                            options: function($value){
+                            options: function ($value) {
                                 // getting files .env in the root directory
                                 return collect(glob('./.e*.encrypted'))->map(fn ($file) => basename($file))->filter(fn ($file) => Str::contains($file, $value, ignoreCase: true));
                             },
-                        );                        
+                        );
 
             return $this->defineEncryptedFilename($response, $clearFileName);
         }
@@ -187,7 +185,6 @@ trait EncryptionTrait
     /**
      * Defining a proper encryption key
      *
-     * @param  ?string  $key
      * @return string valid key
      */
     protected function defineKey(?string $key): string
@@ -204,7 +201,7 @@ trait EncryptionTrait
             }
         }
 
-        if (true === $valid) {
+        if ($valid === true) {
             return $key;
         } else {
             return $this->defineKey(password(
@@ -234,9 +231,7 @@ trait EncryptionTrait
 
     /**
      * Decrypting data
-     * 
-     * @param string $encryptedData
-     * @param string $key
+     *
      * @return string decrypted data
      */
     protected function decryptData(string $encryptedData, string $key): string
@@ -262,11 +257,10 @@ trait EncryptionTrait
      * A name has been set?
      *
      * @param string
-     * @return bool
      */
     private function hasName(?string $filename): bool
     {
-        return null !== $filename && ! empty($filename);
+        return $filename !== null && ! empty($filename);
     }
 
     /**
@@ -274,7 +268,6 @@ trait EncryptionTrait
      * Only letters, numbers, . (max 1 in a row), -, _ are allowed
      *
      * @param string
-     * @return bool
      */
     private function hasforbiddenCharacters(string $filename): bool
     {
@@ -284,14 +277,13 @@ trait EncryptionTrait
             return false;
         }
 
-        return  true;
+        return true;
     }
 
     /**
      * Does the name contains .env?
      *
      * @param string
-     * @return bool
      */
     private function hasEnvInName(string $filename): bool
     {
@@ -309,7 +301,6 @@ trait EncryptionTrait
      *
      * @param string
      * @param bool show errors?
-     * @return bool
      */
     private function hasFile(string $filename, bool $dont_show_error = false): bool
     {
@@ -328,7 +319,6 @@ trait EncryptionTrait
      * Does the name starts with dot (hidden file)
      *
      * @param string
-     * @return bool
      */
     private function startsWithDot(string $filename): bool
     {

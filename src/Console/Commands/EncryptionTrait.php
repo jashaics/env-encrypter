@@ -333,7 +333,9 @@ trait EncryptionTrait
     private function startsWithDot(string $filename): bool
     {
         if (! preg_match('/^\./', $filename)) {
-            info(__('env-encrypter::errors.must_start_with_dot'));
+            error(__('env-encrypter::errors.must_start_with_dot'));
+
+            return false;
         }
 
         return true;

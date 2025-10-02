@@ -10,4 +10,9 @@ return [
     'encryption_fail' => 'An error occurred while encrypting data.',
     'decryption_fail' => 'An error occurred while decrypting data.',
     'prompted_for_file_name' => 'Please provide a new file name',
+    'invalid_base64' => 'The provided data is not valid base64.',
+    'invalid_iv_length' => 'The provided IV length is invalid.',
+    'source_option_required' => 'The --source option is required.',
+    'destination_option_required' => 'The --destination option is required.',
+    'key_option_required' => 'The --key option is required.',
 ];

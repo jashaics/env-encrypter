@@ -53,10 +53,28 @@ class Decrypt extends Command
     /**
      * Execute the command.
      *
-     * @return void
+     * @return int
      */
-    public function handle()
+    public function handle(): int
     {
+        if(!is_string($this->option('source')) || trim($this->option('source')) === '') {
+            $message = __('env-encrypter::errors.source_option_required');
+            error(is_string($message) ? $message : 'Source option required');
+            return Command::FAILURE;
+        }
+
+        if(!is_string($this->option('destination')) || trim($this->option('destination')) === '') {
+            $message = __('env-encrypter::errors.destination_option_required');
+            error(is_string($message) ? $message : 'Destination option required');
+            return Command::FAILURE;
+        }
+
+        if(!is_string($this->option('key')) || trim($this->option('key')) === '') {
+            $message = __('env-encrypter::errors.key_option_required');
+            error(is_string($message) ? $message : 'Key option required');
+            return Command::FAILURE;
+        }
+
         // setting source filename
         $sourcefilename = $this->defineEncryptedFilename($this->option('source'));
 
@@ -69,16 +87,25 @@ class Decrypt extends Command
         // fetching file content
         $data = file_get_contents($sourcefilename);
 
-        $decryptedData = $this->decryptData($data, $key);
+        if ($data === false) {
+            $message = __('env-encrypter::errors.file_read_fail', ['name' => $sourcefilename]);
+            error(is_string($message) ? $message : 'Failed to read file');
+            return Command::FAILURE;
+        }
 
-        if ($decryptedData === false) {
-            error(__('env-encrypter::errors.decryption_fail'));
-            exit;
+        try {
+            $decryptedData = $this->decryptData($data, $key);
+        } catch (\Exception $e) {
+            error($e->getMessage());
+            return Command::FAILURE;
         }
 
         // encrypting content: if everything works fine deleting backup
         file_put_contents($destinationfilename, $decryptedData, LOCK_EX);
 
-        info(__('env-encrypter::questions.'.$this->action.'.conclusion', ['source' => $sourcefilename, 'destination' => $destinationfilename]));
+        $message = __('env-encrypter::questions.'.$this->action.'.conclusion', ['source' => $sourcefilename, 'destination' => $destinationfilename]);
+        info(is_string($message) ? $message : '');
+
+        return Command::SUCCESS;
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Jashaics\EnvEncrypter\Console\Commands;
 
+use Exception;
 use Illuminate\Support\Str;
 
 use function Laravel\Prompts\alert;
@@ -34,8 +35,9 @@ trait EncryptionTrait
         // by default filename is valid
         $valid = true;
 
-        // if filename otherwise is null
-        $filename = $filename ?? null;
+        // if filename otherwise is empty string
+        $filename = $filename ?? '';
+        $encryptedFileName = $encryptedFileName ?? '';
 
         // if there is a name then valid for now
         $valid = $this->hasName($filename);
@@ -67,7 +69,7 @@ trait EncryptionTrait
                     $valid = ! $this->hasFile($filename, true);
 
                     // if there is already an encrypted file with same filename ask for overwriting
-                    if (! $valid && (! app()->isProduction() || ! $this->options('force'))) {
+                    if (! $valid && (! app()->isProduction() || ! $this->option('force'))) {
                         $valid = (bool) confirm(__('env-encrypter::questions.'.$this->action.'.overwrite_file', ['filename' => $filename]));
                     }
                     break;
@@ -78,11 +80,13 @@ trait EncryptionTrait
         if ($valid === true) {
             return $filename;
         } else {
+            $encryptedFileName = preg_replace('/\.encrypted$/', '', $encryptedFileName);
+            $encryptedFileName = $encryptedFileName ?? '';
             $clearFileName = (bool) $encryptedFileName
                         // setting the name of the file after decryption
                         ? suggest(
                             label: __('env-encrypter::questions.'.$this->action.'.clear_filename'),
-                            options: [preg_replace('/\.encrypted$/', '', $encryptedFileName)]
+                            options: [$encryptedFileName]
                         )
                         // setting the name of the file to encrypt
                         : suggest(
@@ -113,7 +117,7 @@ trait EncryptionTrait
     protected function defineEncryptedFilename(?string $filename, ?string $clearFileName = null): string
     {
         $valid = true;
-        $filename = $filename ?? null;
+        $filename = $filename ?? '';
 
         $valid = $this->hasName($filename);
 
@@ -191,19 +195,20 @@ trait EncryptionTrait
     protected function defineKey(?string $key): string
     {
         $valid = true;
-        $key = $key ?? null;
+        $key = $key ?? '';
 
         $valid = $this->hasName($key);
 
         if ($valid === true && $this->action === 'encrypt') {
             $valid = strlen($key) >= $this->min_key_length;
             if (! $valid) {
-                error(__('env-encrypter::errors.key_min_length', ['minlength' => $this->min_key_length]));
+                $message = __('env-encrypter::errors.key_min_length', ['minlength' => $this->min_key_length]);
+                error(is_string($message) ? $message : 'Key too short');
             }
         }
 
         if ($valid === true) {
-            return $key;
+            return $key ?? '';
         } else {
             return $this->defineKey(password(
                 label: __('env-encrypter::questions.'.$this->action.'.key', ['minlength' => $this->min_key_length]),
@@ -218,12 +223,16 @@ trait EncryptionTrait
      * @param string $data in plain text
      * @param string $key
      * @return string encrypted plain text
+     * @throws Exception
      */
     protected function encryptData(string $data, string $key)
     {
         $cipher = 'aes-256-cbc';
 
         $ivlen = openssl_cipher_iv_length($cipher);
+        if(false == $ivlen){
+            throw new Exception(trans('env-encrypter::errors.invalid_iv_length'));
+        }
         $iv = openssl_random_pseudo_bytes($ivlen);
         $encrypted = openssl_encrypt($data, $cipher, base64_encode($key), 0, $iv, $tag);
 
@@ -233,7 +242,10 @@ trait EncryptionTrait
     /**
      * Decrypting data
      *
+     * @param string $encryptedData
+     * @param string $key
      * @return string decrypted data
+     * @throws Exception
      */
     protected function decryptData(string $encryptedData, string $key): string
     {
@@ -241,13 +253,27 @@ trait EncryptionTrait
 
         $ivlen = openssl_cipher_iv_length($cipher);
 
-        $encryptedData = base64_decode($encryptedData);
+        if(false == $ivlen){
+            throw new Exception(trans('env-encrypter::errors.invalid_iv_length'));
+        }
 
-        $EncryptedContent = mb_substr($encryptedData, $ivlen, null, '8bit');
+        $base64EncryptedData = base64_decode($encryptedData);
 
-        $iv = mb_substr($encryptedData, 0, $ivlen, '8bit');
+        if(false == $base64EncryptedData){
+            throw new Exception(trans('env-encrypter::errors.invalid_base64'));
+        }
 
-        return openssl_decrypt($EncryptedContent, $cipher, base64_encode($key), 0, $iv);
+        $EncryptedContent = mb_substr($base64EncryptedData, $ivlen, null, '8bit');
+
+        $iv = mb_substr($base64EncryptedData, 0, $ivlen, '8bit');
+
+        $decrypted = openssl_decrypt($EncryptedContent, $cipher, base64_encode($key), 0, $iv);
+
+        if(false === $decrypted){
+            throw new Exception((string) trans('env-encrypter::errors.decryption_fail'));
+        }
+
+        return $decrypted;
     }
 
     /**
@@ -269,12 +295,14 @@ trait EncryptionTrait
      * filename has forbidden characters?
      * Only letters, numbers, . (max 1 in a row), -, _ are allowed
      *
-     * @param string
+     * @param string $filename
+     * @return bool
      */
     private function hasforbiddenCharacters(string $filename): bool
     {
         if (preg_match('/[^\w\d\.\-_]+|\.{2,}/', $filename)) {
-            error(__('env-encrypter::errors.characters_not_allowed'));
+            $message = __('env-encrypter::errors.characters_not_allowed');
+            error(is_string($message) ? $message : 'Invalid characters');
 
             return false;
         }
@@ -291,7 +319,8 @@ trait EncryptionTrait
     private function hasEnvInName(string $filename): bool
     {
         if (! preg_match('/\.env/', $filename)) {
-            error(__('env-encrypter::errors.filename'));
+            $message = __('env-encrypter::errors.filename');
+            error(is_string($message) ? $message : 'Invalid filename');
 
             return false;
         }
@@ -310,9 +339,9 @@ trait EncryptionTrait
     {
         if (! file_exists($filename)) {
             if ($dont_show_error !== true) {
-                error(__('env-encrypter::errors.file_not_found', ['name' => $filename]));
+                $message = __('env-encrypter::errors.file_not_found', ['name' => $filename]);
+                error(is_string($message) ? $message : 'File not found');
             }
-
             return false;
         }
 
@@ -328,7 +357,8 @@ trait EncryptionTrait
     private function startsWithDot(string $filename): bool
     {
         if (! preg_match('/^\./', $filename)) {
-            error(__('env-encrypter::errors.must_start_with_dot'));
+            $message = __('env-encrypter::errors.must_start_with_dot');
+            error(is_string($message) ? $message : 'Must start with dot');
 
             return false;
         }

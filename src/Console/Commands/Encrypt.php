@@ -58,32 +58,18 @@ class Encrypt extends Command
      */
     public function handle(): int
     {
-        if(!is_string($this->option('source')) || trim($this->option('source')) === '') {
-            $message = __('env-encrypter::errors.source_option_required');
-            error(is_string($message) ? $message : 'Source option required');
-            return Command::FAILURE;
-        }
-
-        if(!is_string($this->option('destination')) || trim($this->option('destination')) === '') {
-            $message = __('env-encrypter::errors.destination_option_required');
-            error(is_string($message) ? $message : 'Destination option required');
-            return Command::FAILURE;
-        }
-
-        if(!is_string($this->option('key')) || trim($this->option('key')) === '') {
-            $message = __('env-encrypter::errors.key_option_required');
-            error(is_string($message) ? $message : 'Key option required');
-            return Command::FAILURE;
-        }
+        $source = !is_string($this->option('source')) || trim($this->option('source')) === '' ? '' : $this->option('source');
+        $destination = !is_string($this->option('destination')) || trim($this->option('destination')) === '' ? '' : $this->option('destination');
+        $key = !is_string($this->option('key')) || trim($this->option('key')) === '' ? '' : $this->option('key');
 
         // setting source filename
-        $sourcefilename = $this->defineClearFilename($this->option('source'));
+        $sourcefilename = $this->defineClearFilename($source);
 
         // setting destination filename
-        $destinationfilename = $this->defineEncryptedFilename($this->option('destination'), $sourcefilename);
+        $destinationfilename = $this->defineEncryptedFilename($destination, $sourcefilename);
 
         // setting key
-        $key = $this->defineKey($this->option('key'));
+        $key = $this->defineKey($key);
 
         // fetching file content
         $data = file_get_contents($sourcefilename);

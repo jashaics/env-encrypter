@@ -1,3 +1,10 @@
+## [2.0.2](https://github.com/jashaics/env-encrypter/compare/v2.0.1...v2.0.2) (2025-10-02)
+
+
+### Bug Fixes
+
+* :safety_vest: Added input validation logic ([cb5b7be](https://github.com/jashaics/env-encrypter/commit/cb5b7bed7ff1f66c846fe41e2cc0c273566d7b26))
+
 ## [2.0.1](https://github.com/jashaics/env-encrypter/compare/v2.0.0...v2.0.1) (2025-10-02)
 
 

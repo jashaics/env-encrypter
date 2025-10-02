@@ -25,8 +25,8 @@ trait EncryptionTrait
     /**
      * Defining a proper filename
      *
-     * @param ?string
-     * @param ?string
+     * @param ?string $filename
+     * @param ?string $encryptedFileName
      * @return string valid filename
      */
     protected function defineClearFilename(?string $filename, ?string $encryptedFileName = null): string
@@ -106,8 +106,8 @@ trait EncryptionTrait
     /**
      * Defining a proper encrypted filename
      *
-     * @param ?string
-     * @param ?string
+     * @param ?string $filename
+     * @param ?string $clearFileName
      * @return string valid filename
      */
     protected function defineEncryptedFilename(?string $filename, ?string $clearFileName = null): string
@@ -185,6 +185,7 @@ trait EncryptionTrait
     /**
      * Defining a proper encryption key
      *
+     * @param ?string $key
      * @return string valid key
      */
     protected function defineKey(?string $key): string
@@ -214,8 +215,8 @@ trait EncryptionTrait
     /**
      * Generating encrypted data
      *
-     * @param string plain text
-     * @param string key
+     * @param string $data in plain text
+     * @param string $key
      * @return string encrypted plain text
      */
     protected function encryptData(string $data, string $key)
@@ -256,7 +257,8 @@ trait EncryptionTrait
     /**
      * A name has been set?
      *
-     * @param string
+     * @param ?string $filename
+     * @return bool
      */
     private function hasName(?string $filename): bool
     {
@@ -283,7 +285,8 @@ trait EncryptionTrait
     /**
      * Does the name contains .env?
      *
-     * @param string
+     * @param string $filename
+     * @return bool
      */
     private function hasEnvInName(string $filename): bool
     {
@@ -299,8 +302,9 @@ trait EncryptionTrait
     /**
      * Does the file exists?
      *
-     * @param string
-     * @param bool show errors?
+     * @param string $filename
+     * @param bool $dont_show_error
+     * @return bool
      */
     private function hasFile(string $filename, bool $dont_show_error = false): bool
     {
@@ -318,7 +322,8 @@ trait EncryptionTrait
     /**
      * Does the name starts with dot (hidden file)
      *
-     * @param string
+     * @param string $filename
+     * @return bool
      */
     private function startsWithDot(string $filename): bool
     {

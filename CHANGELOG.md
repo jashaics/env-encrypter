@@ -1,3 +1,10 @@
+## [2.0.3](https://github.com/jashaics/env-encrypter/compare/v2.0.2...v2.0.3) (2025-10-02)
+
+
+### Bug Fixes
+
+* :bug: Fixed validation logic in suggest ([58666e8](https://github.com/jashaics/env-encrypter/commit/58666e86241ddbd953b1f62072d19035a50d374b))
+
 ## [2.0.2](https://github.com/jashaics/env-encrypter/compare/v2.0.1...v2.0.2) (2025-10-02)
 
 

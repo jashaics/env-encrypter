@@ -86,7 +86,12 @@ trait EncryptionTrait
                         // setting the name of the file after decryption
                         ? suggest(
                             label: __('env-encrypter::questions.'.$this->action.'.clear_filename'),
-                            options: [$encryptedFileName]
+                            options: [$encryptedFileName],
+                            validate: fn ($value) => match (true) {
+                                preg_match('/[^\w\d\.\-_]+|\.{2,}/', $value) => __('env-encrypter::errors.characters_not_allowed'),
+                                ! preg_match('/\.env/', $value) => __('env-encrypter::errors.filename'),
+                                default => null
+                            }
                         )
                         // setting the name of the file to encrypt
                         : suggest(
@@ -171,7 +176,12 @@ trait EncryptionTrait
                         // setting the name of the file after encryption
                         ? suggest(
                             label: __('env-encrypter::questions.'.$this->action.'.encrypted_filename'),
-                            options: [$clearFileName.'.encrypted']
+                            options: [$clearFileName.'.encrypted'],
+                            validate: fn ($value) => match (true) {
+                                preg_match('/[^\w\d\.\-_]+|\.{2,}/', $value) => __('env-encrypter::errors.characters_not_allowed'),
+                                ! preg_match('/\.env/', $value) => __('env-encrypter::errors.filename'),
+                                default => null
+                            }
                         )
                         // setting the name of the file to decrypt
                         : suggest(
@@ -180,6 +190,11 @@ trait EncryptionTrait
                                 // getting files .env in the root directory
                                 return collect(glob('./.e*.encrypted'))->map(fn ($file) => basename($file))->filter(fn ($file) => Str::contains($file, $value, ignoreCase: true));
                             },
+                            validate: fn ($value) => match (true) {
+                                preg_match('/[^\w\d\.\-_]+|\.{2,}/', $value) => __('env-encrypter::errors.characters_not_allowed'),
+                                ! preg_match('/\.env/', $value) => __('env-encrypter::errors.filename'),
+                                default => null
+                            }
                         );
 
             return $this->defineEncryptedFilename($response, $clearFileName);

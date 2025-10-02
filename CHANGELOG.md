@@ -1,3 +1,10 @@
+## [2.0.1](https://github.com/jashaics/env-encrypter/compare/v2.0.0...v2.0.1) (2025-10-02)
+
+
+### Bug Fixes
+
+* :bug: Fixed missing validation logic error ([58885bf](https://github.com/jashaics/env-encrypter/commit/58885bfe60cf0ee7d03c109be8fb7f77e8aa7d2b))
+
 # [2.0.0](https://github.com/jashaics/env-encrypter/compare/v1.2.0...v2.0.0) (2025-09-03)
 
 

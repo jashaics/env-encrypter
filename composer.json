@@ -45,7 +45,7 @@
         }
     },
     "scripts": {
-        "test": "./vendor/bin/pest",
+        "test": "./vendor/bin/phpunit --testdox -v",
         "fix": "./vendor/bin/pint",
         "check": "./vendor/bin/pint --test -v",
         "static": "./vendor/bin/phpstan analyse",
@@ -56,20 +56,15 @@
             "@static"
         ]
     },
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "prefer-stable": true,
     "config": {
         "sort-packages": true,
         "preferred-install": "dist",
-        "optimize-autoloader": true,
-        "allow-plugins": {
-            "pestphp/pest-plugin": true
-        }
+        "optimize-autoloader": true
     },
     "require-dev": {
         "laravel/pint": "^1.15",
-        "orchestra/testbench": "^9.0",
-        "pestphp/pest": "^2.34",
-        "phpstan/phpstan": "^1.10"
+        "larastan/larastan": "^2.0"
     }
 }

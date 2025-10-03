@@ -97,18 +97,17 @@ trait EncryptionTrait
                         // setting the name of the file to encrypt
                         : suggest(
                             label: is_string($label) ? $label : 'Enter filename',
-                            options: function ($value) {
+                            options: function (string $value) {
                                 // getting files .env in the root directory
                                 return collect(glob('./.e*'))->map(fn ($file) => basename($file))->filter(fn ($file) => Str::contains($file, $value, ignoreCase: true));
                             },
                             transform: fn (string $value) => ! $this->startsWithDot($value) ? '.'.$value : $value,
-                            validate: fn ($value) => match (true) {
+                            validate: fn (string $value) => match (true) {
                                 preg_match('/[^\w\d\.\-_]+|\.{2,}/', $value) => __('env-encrypter::errors.characters_not_allowed'),
                                 ! preg_match('/\.env/', $value) => __('env-encrypter::errors.filename'),
                                 default => null
                             }
                         );
-
             return $this->defineClearFilename($clearFileName, $encryptedFileName);
         }
     }
@@ -193,7 +192,7 @@ trait EncryptionTrait
                                 // getting files .env in the root directory
                                 return collect(glob('./.e*.encrypted'))->map(fn ($file) => basename($file))->filter(fn ($file) => Str::contains($file, $value, ignoreCase: true));
                             },
-                            validate: fn ($value) => match (true) {
+                            validate: fn (string $value) => match (true) {
                                 preg_match('/[^\w\d\.\-_]+|\.{2,}/', $value) => __('env-encrypter::errors.characters_not_allowed'),
                                 ! preg_match('/\.env/', $value) => __('env-encrypter::errors.filename'),
                                 default => null

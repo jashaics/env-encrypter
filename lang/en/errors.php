@@ -15,4 +15,7 @@ return [
     'source_option_required' => 'The --source option is required.',
     'destination_option_required' => 'The --destination option is required.',
     'key_option_required' => 'The --key option is required.',
+    'backup_write_fail' => 'Failed to write backup file :name',
+    'file_read_fail' => 'Failed to read file :name',
+    'file_write_fail' => 'Failed to write file :name',
 ];

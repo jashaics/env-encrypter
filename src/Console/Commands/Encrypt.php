@@ -4,6 +4,7 @@ namespace Jashaics\EnvEncrypter\Console\Commands;
 
 use Exception;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\File;
 
 use function Laravel\Prompts\error;
 use function Laravel\Prompts\info;
@@ -58,27 +59,26 @@ class Encrypt extends Command
      */
     public function handle(): int
     {
+        $this->info('Starting encryption...');
         $source = !is_string($this->option('source')) || trim($this->option('source')) === '' ? '' : $this->option('source');
         $destination = !is_string($this->option('destination')) || trim($this->option('destination')) === '' ? '' : $this->option('destination');
         $key = !is_string($this->option('key')) || trim($this->option('key')) === '' ? '' : $this->option('key');
 
         // setting source filename
         $sourcefilename = $this->defineClearFilename($source);
+        $this->info('Source file: '.$sourcefilename);
 
         // setting destination filename
         $destinationfilename = $this->defineEncryptedFilename($destination, $sourcefilename);
+        $this->info('Destination file: '.$destinationfilename);
 
         // setting key
         $key = $this->defineKey($key);
+        $this->info('Using key: '.substr($key, 0, 4).'...'.substr($key, -4).' ('.strlen($key).' chars)');
 
         // fetching file content
-        $data = file_get_contents($sourcefilename);
-
-        if ($data === false) {
-            $message = __('env-encrypter::errors.file_read_fail', ['name' => $sourcefilename]);
-            error(is_string($message) ? $message : 'Failed to read file');
-            exit;
-        }
+        $data = File::get($sourcefilename);
+        $this->info('Fetched file content from: '.$sourcefilename);
 
         // creating a backup of source file
         $backup = null;
@@ -89,22 +89,37 @@ class Encrypt extends Command
                 $backup = null;
             }
         }
-        file_put_contents($backup, $data, LOCK_EX);
+        $success = File::put($backup, $data, true);
+        if(false === $success){
+            $message = __('env-encrypter::errors.backup_write_fail', ['name' => $backup]);
+            error(is_string($message) ? $message : 'Failed to write backup');
+        }
+        $this->info('Created backup of source file: '.$backup);
 
         try {
             $encryptedData = $this->encryptData($data, $key);
+            $this->info('Encrypted data successfully.');
         } catch (Exception $e) {
             error($e->getMessage());
             return Command::FAILURE;
         }
 
         // encrypting content: if everything works fine deleting backup
-        if (file_put_contents($destinationfilename, $encryptedData, LOCK_EX)) {
-            unlink($backup);
+        $success = File::put($destinationfilename, $encryptedData, true);
+        if(false === $success){
+            $message = __('env-encrypter::errors.file_write_fail', ['name' => $destinationfilename]);
+            error(is_string($message) ? $message : 'Failed to write file');
+            return Command::FAILURE;
         }
+        File::chmod($destinationfilename, 0775 & ~umask());
+
+        unlink($backup);
+        $this->info('Wrote encrypted data to: '.$destinationfilename);
+        $this->info('Deleted backup file: '.$backup);
 
         $message = __('env-encrypter::questions.'.$this->action.'.conclusion', ['source' => $sourcefilename, 'destination' => $destinationfilename]);
         info(is_string($message) ? $message : '');
+        $this->info('Encryption process completed.');
 
         return Command::SUCCESS;
     }

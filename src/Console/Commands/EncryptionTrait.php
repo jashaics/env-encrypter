@@ -51,7 +51,6 @@ trait EncryptionTrait
         if ($valid === true) {
             $valid = $this->hasEnvInName($filename);
         }
-
         // checking if source file starts with dot
         if ($valid === true) {
             if (! $this->startsWithDot($filename)) {
@@ -66,11 +65,12 @@ trait EncryptionTrait
                     break;
 
                 case 'decrypt':
-                    $valid = ! $this->hasFile($filename, true);
+                    $valid = !$this->hasFile($filename, true) || $this->option('force');
 
                     // if there is already an encrypted file with same filename ask for overwriting
-                    if (! $valid && (! app()->isProduction() || ! $this->option('force'))) {
-                        $valid = (bool) confirm(__('env-encrypter::questions.'.$this->action.'.overwrite_file', ['filename' => $filename]));
+                    if (! $valid) {
+                        $message = __('env-encrypter::questions.'.$this->action.'.overwrite_file', ['filename' => $filename]);
+                        $valid = (bool) confirm(is_string($message) ? $message : 'Overwrite file?');
                     }
                     break;
             }
@@ -82,10 +82,11 @@ trait EncryptionTrait
         } else {
             $encryptedFileName = preg_replace('/\.encrypted$/', '', $encryptedFileName);
             $encryptedFileName = $encryptedFileName ?? '';
+            $label = __('env-encrypter::questions.'.$this->action.'.clear_filename');
             $clearFileName = (bool) $encryptedFileName
                         // setting the name of the file after decryption
                         ? suggest(
-                            label: __('env-encrypter::questions.'.$this->action.'.clear_filename'),
+                            label: is_string($label) ? $label : 'Enter filename',
                             options: [$encryptedFileName],
                             validate: fn ($value) => match (true) {
                                 preg_match('/[^\w\d\.\-_]+|\.{2,}/', $value) => __('env-encrypter::errors.characters_not_allowed'),
@@ -95,7 +96,7 @@ trait EncryptionTrait
                         )
                         // setting the name of the file to encrypt
                         : suggest(
-                            label: __('env-encrypter::questions.'.$this->action.'.clear_filename'),
+                            label: is_string($label) ? $label : 'Enter filename',
                             options: function ($value) {
                                 // getting files .env in the root directory
                                 return collect(glob('./.e*'))->map(fn ($file) => basename($file))->filter(fn ($file) => Str::contains($file, $value, ignoreCase: true));
@@ -123,7 +124,6 @@ trait EncryptionTrait
     {
         $valid = true;
         $filename = $filename ?? '';
-
         $valid = $this->hasName($filename);
 
         // adding encrypted at the end
@@ -155,14 +155,16 @@ trait EncryptionTrait
                     break;
 
                 case 'encrypt':
-                    $valid = ! $this->hasFile($filename, true);
+                    $valid = ! $this->hasFile($filename, true) || $this->option('force');
 
                     // if there is already an encrypted file with same filename ask for overwriting
-                    if (! $valid && (! app()->isProduction() || ! $this->options('force'))) {
-                        $valid = (bool) confirm(__('env-encrypter::questions.'.$this->action.'.overwrite_file', ['filename' => $filename]));
+                    if (! $valid) {
+                        $message = __('env-encrypter::questions.'.$this->action.'.overwrite_file', ['filename' => $filename]);
+                        $valid = (bool) confirm(is_string($message) ? $message : 'Overwrite file?');
 
                         if ($valid === false) {
-                            alert(__('env-encrypter::errors.prompted_for_file_name'));
+                            $alertMessage = __('env-encrypter::errors.prompted_for_file_name');
+                            alert(is_string($alertMessage) ? $alertMessage : 'Please provide a different filename');
                         }
                     }
                     break;
@@ -172,12 +174,13 @@ trait EncryptionTrait
         if ($valid === true) {
             return $filename;
         } else {
+            $label = __('env-encrypter::questions.'.$this->action.'.encrypted_filename');
             $response = (bool) $clearFileName
                         // setting the name of the file after encryption
                         ? suggest(
-                            label: __('env-encrypter::questions.'.$this->action.'.encrypted_filename'),
+                            label: is_string($label) ? $label : 'Enter encrypted filename',
                             options: [$clearFileName.'.encrypted'],
-                            validate: fn ($value) => match (true) {
+                            validate: fn (string $value) => match (true) {
                                 preg_match('/[^\w\d\.\-_]+|\.{2,}/', $value) => __('env-encrypter::errors.characters_not_allowed'),
                                 ! preg_match('/\.env/', $value) => __('env-encrypter::errors.filename'),
                                 default => null
@@ -185,8 +188,8 @@ trait EncryptionTrait
                         )
                         // setting the name of the file to decrypt
                         : suggest(
-                            label: __('env-encrypter::questions.'.$this->action.'.encrypted_filename'),
-                            options: function ($value) {
+                            label: is_string($label) ? $label : 'Enter encrypted filename',
+                            options: function (string $value) {
                                 // getting files .env in the root directory
                                 return collect(glob('./.e*.encrypted'))->map(fn ($file) => basename($file))->filter(fn ($file) => Str::contains($file, $value, ignoreCase: true));
                             },
@@ -223,10 +226,11 @@ trait EncryptionTrait
         }
 
         if ($valid === true) {
-            return $key ?? '';
+            return $key;
         } else {
+            $label = __('env-encrypter::questions.'.$this->action.'.key', ['minlength' => $this->min_key_length]);
             return $this->defineKey(password(
-                label: __('env-encrypter::questions.'.$this->action.'.key', ['minlength' => $this->min_key_length]),
+                label: is_string($label) ? $label : 'Enter encryption key',
                 validate: ['password' => 'min:'.$this->min_key_length]
             ));
         }
@@ -333,7 +337,7 @@ trait EncryptionTrait
      */
     private function hasEnvInName(string $filename): bool
     {
-        if (! preg_match('/\.env/', $filename)) {
+        if (! preg_match('/\benv\b/', $filename)) {
             $message = __('env-encrypter::errors.filename');
             error(is_string($message) ? $message : 'Invalid filename');
 

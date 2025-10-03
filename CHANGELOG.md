@@ -1,3 +1,10 @@
+## [2.0.4](https://github.com/jashaics/env-encrypter/compare/v2.0.3...v2.0.4) (2025-10-03)
+
+
+### Bug Fixes
+
+* Fixed type hinting ([a9116e0](https://github.com/jashaics/env-encrypter/commit/a9116e0fe67ab476166312edc0b76f286db6f492))
+
 ## [2.0.3](https://github.com/jashaics/env-encrypter/compare/v2.0.2...v2.0.3) (2025-10-02)
 
 

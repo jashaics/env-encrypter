@@ -230,7 +230,9 @@ trait EncryptionTrait
             $label = __('env-encrypter::questions.'.$this->action.'.key', ['minlength' => $this->min_key_length]);
             return $this->defineKey(password(
                 label: is_string($label) ? $label : 'Enter encryption key',
-                validate: ['password' => 'min:'.$this->min_key_length]
+                validate: fn (string $value) => strlen($value) < $this->min_key_length
+                    ? (string) __('env-encrypter::errors.key_min_length', ['minlength' => $this->min_key_length])
+                    : null
             ));
         }
     }

@@ -1,3 +1,10 @@
+## [2.0.5](https://github.com/jashaics/env-encrypter/compare/v2.0.4...v2.0.5) (2026-03-15)
+
+
+### Bug Fixes
+
+* Refactor key validation logic in EncryptionTrait ([6bc6837](https://github.com/jashaics/env-encrypter/commit/6bc683724316dd5fb9f4dfbb4465deff824fb1a8))
+
 ## [2.0.4](https://github.com/jashaics/env-encrypter/compare/v2.0.3...v2.0.4) (2025-10-03)
 
 

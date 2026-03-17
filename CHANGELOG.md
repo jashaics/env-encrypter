@@ -1,3 +1,10 @@
+# [2.1.0](https://github.com/jashaics/env-encrypter/compare/v2.0.5...v2.1.0) (2026-03-17)
+
+
+### Features
+
+* Update illuminate dependencies to include version 13 ([13000aa](https://github.com/jashaics/env-encrypter/commit/13000aaeeeaddf060739f235bd0402e71850c358))
+
 ## [2.0.5](https://github.com/jashaics/env-encrypter/compare/v2.0.4...v2.0.5) (2026-03-15)
 
 

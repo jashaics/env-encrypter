@@ -4,7 +4,7 @@ namespace Jashaics\EnvEncrypter\Tests\Unit;
 
 use Illuminate\Console\Command;
 use Jashaics\EnvEncrypter\Console\Commands\EncryptionTrait;
-use Tests\TestCase;
+use Jashaics\EnvEncrypter\Tests\TestCase;
 
 class TestCommand extends Command
 {

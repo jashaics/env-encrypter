@@ -45,7 +45,8 @@
         }
     },
     "scripts": {
-        "test": "./vendor/bin/phpunit --testdox -v",
+        "test": "./vendor/bin/phpunit --testdox --no-coverage",
+        "test:coverage": "XDEBUG_MODE=coverage ./vendor/bin/phpunit --testdox --coverage-text --coverage-html coverage/",
         "fix": "./vendor/bin/pint",
         "check": "./vendor/bin/pint --test -v",
         "static": "./vendor/bin/phpstan analyse",
@@ -65,6 +66,8 @@
     },
     "require-dev": {
         "laravel/pint": "^1.15",
-        "larastan/larastan": "^2.0"
+        "larastan/larastan": "^2.0",
+        "orchestra/testbench": "^9.0|^10.0",
+        "phpunit/phpunit": "^11.0|^12.0"
     }
 }

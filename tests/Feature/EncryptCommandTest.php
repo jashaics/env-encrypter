@@ -3,7 +3,7 @@
 namespace Jashaics\EnvEncrypter\Tests\Feature;
 
 use Illuminate\Support\Facades\File;
-use Tests\TestCase;
+use Jashaics\EnvEncrypter\Tests\TestCase;
 
 class EncryptCommandTest extends TestCase
 {

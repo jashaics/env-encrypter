@@ -90,7 +90,7 @@ class Encrypt extends Command
             }
         }
         $success = File::put($backup, $data, true);
-        if(false === $success){
+        if (false === $success) {
             $message = __('env-encrypter::errors.backup_write_fail', ['name' => $backup]);
             error(is_string($message) ? $message : 'Failed to write backup');
         }
@@ -106,7 +106,7 @@ class Encrypt extends Command
 
         // encrypting content: if everything works fine deleting backup
         $success = File::put($destinationfilename, $encryptedData, true);
-        if(false === $success){
+        if (false === $success) {
             $message = __('env-encrypter::errors.file_write_fail', ['name' => $destinationfilename]);
             error(is_string($message) ? $message : 'Failed to write file');
             return Command::FAILURE;

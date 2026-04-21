@@ -24,7 +24,7 @@ class EnvEncrypterController extends Controller
                 throw new Exception('Errore nei parametri');
             }
 
-            if(!is_string($_POST['source']) || !is_string($_POST['destination']) || !is_string($_POST['key'])) {
+            if (!is_string($_POST['source']) || !is_string($_POST['destination']) || !is_string($_POST['key'])) {
                 http_response_code(400);
                 throw new InvalidArgumentException('I parametri devono essere stringhe');
             }
@@ -73,7 +73,7 @@ class EnvEncrypterController extends Controller
 
         } catch (Exception $e) {
             $httpCode = http_response_code();
-            if(is_bool($httpCode)) {
+            if (is_bool($httpCode)) {
                 $httpCode = 500;
             }
             http_response_code($httpCode ?: 500);

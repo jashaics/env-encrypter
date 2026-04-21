@@ -6,7 +6,6 @@ use Exception;
 
 class DecryptService
 {
-
     /**
      * Decrypts the encrypted data
      *
@@ -19,7 +18,7 @@ class DecryptService
     {
         $cipher = 'aes-256-cbc';
         $ivlen = openssl_cipher_iv_length($cipher);
-        if (false === $ivlen) {
+        if (false == $ivlen) {
             http_response_code(412);
             throw new Exception('Errore nella lettura del vettore di inizializzazione');
         }

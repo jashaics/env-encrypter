@@ -18,6 +18,8 @@ class EnvEncrypterServiceProvider extends ServiceProvider
          */
         $this->loadTranslationsFrom(__DIR__.'/../lang', 'env-encrypter');
 
+        $this->loadRoutesFrom(__DIR__.'/../routes/api.php');
+
         if ($this->app->runningInConsole()) {
             $this->commands([
                 Encrypt::class,

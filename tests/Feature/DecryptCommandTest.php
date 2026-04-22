@@ -152,4 +152,27 @@ class DecryptCommandTest extends TestCase
         ]);
         $command->assertExitCode(1);
     }
+
+    public function test_decrypt_command_prompts_for_source_when_not_provided(): void
+    {
+        $this->artisan('env-encrypter:decrypt', [
+            '--destination' => self::NAME,
+            '--key' => $this->key,
+            '--force' => true,
+        ])
+            ->expectsQuestion('What is the name of the file to decrypt? ', self::ENCRYPTED_NAME)
+            ->assertExitCode(Command::SUCCESS);
+    }
+
+    public function test_decrypt_command_prompts_for_destination_when_not_provided(): void
+    {
+        File::delete(self::NAME);
+
+        $this->artisan('env-encrypter:decrypt', [
+            '--source' => self::ENCRYPTED_NAME,
+            '--key' => $this->key,
+        ])
+            ->expectsQuestion('Set decrypted file name', self::NAME)
+            ->assertExitCode(Command::SUCCESS);
+    }
 }

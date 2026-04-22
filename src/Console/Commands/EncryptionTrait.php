@@ -79,10 +79,6 @@ trait EncryptionTrait
         // if everything is ok return filename, otherwise ask for filename again
         if ($valid === true) {
             return $filename;
-        // @codeCoverageIgnoreStart
-        // Recursive fallback using suggest() prompt — imported via `use function Laravel\Prompts\suggest` (compile-time binding),
-        // so namespace-level mock cannot intercept it. Terminal key-press simulation via Prompt::fake() is too complex
-        // for the suggest options callback (dynamic glob results + transform closures).
         } else {
             $encryptedFileName = preg_replace('/\.encrypted$/', '', $encryptedFileName);
             $encryptedFileName = $encryptedFileName ?? '';
@@ -114,7 +110,6 @@ trait EncryptionTrait
                         );
             return $this->defineClearFilename($clearFileName, $encryptedFileName);
         }
-        // @codeCoverageIgnoreEnd
     }
 
     /**
@@ -166,15 +161,10 @@ trait EncryptionTrait
                         $message = __('env-encrypter::questions.'.$this->action.'.overwrite_file', ['filename' => $filename]);
                         $valid = (bool) confirm(is_string($message) ? $message : 'Overwrite file?');
 
-                        // @codeCoverageIgnoreStart
-                        // confirm() returns false → alert() is called, then we fall to the suggest() else branch below.
-                        // Testing confirm=false requires providing key presses that then trigger the recursive suggest() path,
-                        // which has the same untestable options callback. Covered indirectly by the else block annotation below.
                         if ($valid === false) {
                             $alertMessage = __('env-encrypter::errors.prompted_for_file_name');
                             alert(is_string($alertMessage) ? $alertMessage : 'Please provide a different filename');
                         }
-                        // @codeCoverageIgnoreEnd
                     }
                     break;
             }
@@ -182,9 +172,6 @@ trait EncryptionTrait
 
         if ($valid === true) {
             return $filename;
-        // @codeCoverageIgnoreStart
-        // Same as defineClearFilename: recursive fallback via suggest() with a dynamic options callback (glob).
-        // `use function Laravel\Prompts\suggest` is compile-time bound, so namespace mocking doesn't apply.
         } else {
             $label = __('env-encrypter::questions.'.$this->action.'.encrypted_filename');
             $response = (bool) $clearFileName
@@ -214,7 +201,6 @@ trait EncryptionTrait
 
             return $this->defineEncryptedFilename($response, $clearFileName);
         }
-        // @codeCoverageIgnoreEnd
     }
 
     /**
@@ -244,10 +230,8 @@ trait EncryptionTrait
             $label = __('env-encrypter::questions.'.$this->action.'.key', ['minlength' => $this->min_key_length]);
             return $this->defineKey(password(
                 label: is_string($label) ? $label : 'Enter encryption key',
-                // Prompt::fake() submits the faked value directly without running the validate callback,
-                // so the error branch of this ternary (key too short) is never exercised in tests.
                 validate: fn (string $value) => strlen($value) < $this->min_key_length
-                    ? (string) __('env-encrypter::errors.key_min_length', ['minlength' => $this->min_key_length]) // @codeCoverageIgnore
+                    ? (string) __('env-encrypter::errors.key_min_length', ['minlength' => $this->min_key_length])
                     : null
             ));
         }

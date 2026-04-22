@@ -162,4 +162,53 @@ class EncryptCommandTest extends TestCase
         ]);
         $command->assertExitCode(Command::FAILURE);
     }
+
+    public function test_encrypt_command_prompts_for_source_when_not_provided(): void
+    {
+        $this->artisan('env-encrypter:encrypt', [
+            '--destination' => self::ENCRYPTED_NAME,
+            '--key' => $this->key,
+            '--force' => true,
+        ])
+            ->expectsQuestion('What is the name of the file to encrypt? ', self::NAME)
+            ->assertExitCode(Command::SUCCESS);
+    }
+
+    public function test_encrypt_command_prompts_for_destination_when_not_provided(): void
+    {
+        $this->artisan('env-encrypter:encrypt', [
+            '--source' => self::NAME,
+            '--key' => $this->key,
+        ])
+            ->expectsQuestion('Set encrypted file name (.encrypted will be automatically appended if not present appended)', self::ENCRYPTED_NAME)
+            ->assertExitCode(Command::SUCCESS);
+    }
+
+    public function test_encrypt_command_prompts_for_new_destination_when_overwrite_declined(): void
+    {
+        $altName = '.env.test.alt.encrypted';
+        File::put(self::ENCRYPTED_NAME, 'existing');
+
+        $this->artisan('env-encrypter:encrypt', [
+            '--source' => self::NAME,
+            '--key' => $this->key,
+        ])
+            ->expectsConfirmation(self::ENCRYPTED_NAME.' already exists; do you want to overwrite it?', 'no')
+            ->expectsQuestion('Set encrypted file name (.encrypted will be automatically appended if not present appended)', $altName)
+            ->assertExitCode(Command::SUCCESS);
+
+        File::delete($altName);
+    }
+
+    public function test_encrypt_command_fails_when_key_too_short_in_prompt(): void
+    {
+        $this->artisan('env-encrypter:encrypt', [
+            '--source' => self::NAME,
+            '--destination' => self::ENCRYPTED_NAME,
+            '--key' => 'short',
+            '--force' => true,
+        ])
+            ->expectsQuestion('Set your encryption key (min length 20 characters long)', 'short')
+            ->assertExitCode(Command::FAILURE);
+    }
 }

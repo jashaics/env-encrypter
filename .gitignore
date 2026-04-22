@@ -3,3 +3,4 @@ composer.lock
 /node_modules
 .phpunit.result.cache
 /coverage
+.env.test.alt.encrypted

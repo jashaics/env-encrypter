@@ -27,7 +27,7 @@ class TestCommand extends Command
         $this->forceOption = $force;
     }
 
-    public function option($key = null): mixed
+    public function option($key = null): ?bool
     {
         if ($key === 'force') {
             return $this->forceOption;

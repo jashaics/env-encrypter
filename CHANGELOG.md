@@ -1,3 +1,10 @@
+# [2.2.0](https://github.com/jashaics/env-encrypter/compare/v2.1.0...v2.2.0) (2026-04-22)
+
+
+### Features
+
+* :sparkles: Added endpiont to decrypt env file ([d0adfe8](https://github.com/jashaics/env-encrypter/commit/d0adfe8bbffe26739386c5cf14a40e8d2dd76845))
+
 # [2.1.0](https://github.com/jashaics/env-encrypter/compare/v2.0.5...v2.1.0) (2026-03-17)
 
 

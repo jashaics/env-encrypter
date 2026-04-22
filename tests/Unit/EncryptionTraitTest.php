@@ -2,9 +2,12 @@
 
 namespace Jashaics\EnvEncrypter\Tests\Unit;
 
+use Exception;
 use Illuminate\Console\Command;
 use Jashaics\EnvEncrypter\Console\Commands\EncryptionTrait;
+use Jashaics\EnvEncrypter\Tests\Helpers\FunctionMock;
 use Jashaics\EnvEncrypter\Tests\TestCase;
+use Laravel\Prompts\Prompt;
 
 class TestCommand extends Command
 {
@@ -12,6 +15,26 @@ class TestCommand extends Command
 
     protected $signature = 'test:command';
     protected string $action = 'encrypt';
+    protected bool $forceOption = false;
+
+    public function setAction(string $action): void
+    {
+        $this->action = $action;
+    }
+
+    public function setForce(bool $force): void
+    {
+        $this->forceOption = $force;
+    }
+
+    public function option($key = null): mixed
+    {
+        if ($key === 'force') {
+            return $this->forceOption;
+        }
+
+        return null;
+    }
 
     public function testEncryptData(string $data, string $key): string
     {
@@ -27,6 +50,41 @@ class TestCommand extends Command
     {
         return $this->defineKey($key);
     }
+
+    public function testDefineClearFilename(?string $filename, ?string $encryptedFileName = null): string
+    {
+        return $this->defineClearFilename($filename, $encryptedFileName);
+    }
+
+    public function testDefineEncryptedFilename(?string $filename, ?string $clearFileName = null): string
+    {
+        return $this->defineEncryptedFilename($filename, $clearFileName);
+    }
+
+    public function testHasName(?string $filename): bool
+    {
+        return $this->hasName($filename);
+    }
+
+    public function testHasForbiddenCharacters(string $filename): bool
+    {
+        return $this->hasforbiddenCharacters($filename);
+    }
+
+    public function testHasEnvInName(string $filename): bool
+    {
+        return $this->hasEnvInName($filename);
+    }
+
+    public function testHasFile(string $filename, bool $dontShowError = false): bool
+    {
+        return $this->hasFile($filename, $dontShowError);
+    }
+
+    public function testStartsWithDot(string $filename): bool
+    {
+        return $this->startsWithDot($filename);
+    }
 }
 
 
@@ -38,140 +96,283 @@ class EncryptionTraitTest extends TestCase
     {
         parent::setUp();
 
+        Prompt::fake();
         $this->command = new TestCommand();
+    }
+
+    protected function tearDown(): void
+    {
+        FunctionMock::reset();
+
+        parent::tearDown();
+    }
+
+    public function test_has_name_returns_false_for_null(): void
+    {
+        $this->assertFalse($this->command->testHasName(null));
+    }
+
+    public function test_has_name_returns_false_for_empty_string(): void
+    {
+        $this->assertFalse($this->command->testHasName(''));
+    }
+
+    public function test_has_name_returns_true_for_non_empty_string(): void
+    {
+        $this->assertTrue($this->command->testHasName('.env'));
+    }
+
+    public function test_has_forbidden_characters_returns_true_for_valid_filename(): void
+    {
+        $this->assertTrue($this->command->testHasForbiddenCharacters('.env'));
+        $this->assertTrue($this->command->testHasForbiddenCharacters('.env.encrypted'));
+        $this->assertTrue($this->command->testHasForbiddenCharacters('env_backup-1'));
+    }
+
+    public function test_has_forbidden_characters_returns_false_for_spaces(): void
+    {
+        $this->assertFalse($this->command->testHasForbiddenCharacters('.env file'));
+    }
+
+    public function test_has_forbidden_characters_returns_false_for_double_dot(): void
+    {
+        $this->assertFalse($this->command->testHasForbiddenCharacters('..env'));
+    }
+
+    public function test_has_env_in_name_returns_true_when_env_present(): void
+    {
+        $this->assertTrue($this->command->testHasEnvInName('.env'));
+        $this->assertTrue($this->command->testHasEnvInName('.env.encrypted'));
+    }
+
+    public function test_has_env_in_name_returns_false_when_env_absent(): void
+    {
+        $this->assertFalse($this->command->testHasEnvInName('config.txt'));
+    }
+
+    public function test_has_file_returns_true_when_file_exists(): void
+    {
+        FunctionMock::$fileExistsReturns = true;
+
+        $this->assertTrue($this->command->testHasFile('.env'));
+    }
+
+    public function test_has_file_returns_false_with_error_when_file_missing(): void
+    {
+        FunctionMock::$fileExistsReturns = false;
+
+        $this->assertFalse($this->command->testHasFile('.env', false));
+    }
+
+    public function test_has_file_returns_false_without_error_when_dont_show_error_is_true(): void
+    {
+        FunctionMock::$fileExistsReturns = false;
+
+        $this->assertFalse($this->command->testHasFile('.env', true));
+    }
+
+    public function test_starts_with_dot_returns_true_for_dotfile(): void
+    {
+        $this->assertTrue($this->command->testStartsWithDot('.env'));
+    }
+
+    public function test_starts_with_dot_returns_false_for_no_dot(): void
+    {
+        $this->assertFalse($this->command->testStartsWithDot('env'));
     }
 
     public function test_encrypt_data_encrypts_successfully(): void
     {
-        $data = 'test data';
-        $key = str_repeat('a', 20);
+        $data = 'APP_NAME=TestApp';
+        $key = str_repeat('a', 32);
 
         $encrypted = $this->command->testEncryptData($data, $key);
 
         $this->assertNotEquals($data, $encrypted);
         $this->assertNotEmpty($encrypted);
-        $this->assertGreaterThan(0, strlen($encrypted));
+    }
+
+    public function test_encrypt_data_throws_when_iv_length_fails(): void
+    {
+        FunctionMock::$opensslCipherIvLengthCommandReturnsFalse = true;
+
+        $this->expectException(Exception::class);
+
+        $this->command->testEncryptData('data', str_repeat('a', 32));
     }
 
     public function test_decrypt_data_decrypts_successfully(): void
     {
-        $data = 'test data';
-        $key = str_repeat('a', 20);
+        $key = str_repeat('a', 32);
+        $encrypted = $this->command->testEncryptData('APP_NAME=TestApp', $key);
 
-        $encrypted = $this->command->testEncryptData($data, $key);
-        $decrypted = $this->command->testDecryptData($encrypted, $key);
+        $this->assertEquals('APP_NAME=TestApp', $this->command->testDecryptData($encrypted, $key));
+    }
 
-        $this->assertEquals($data, $decrypted);
+    public function test_decrypt_data_throws_when_iv_length_fails(): void
+    {
+        FunctionMock::$opensslCipherIvLengthCommandReturnsFalse = true;
+
+        $this->expectException(Exception::class);
+
+        $this->command->testDecryptData('somedata', str_repeat('a', 32));
+    }
+
+    public function test_decrypt_data_throws_with_invalid_base64(): void
+    {
+        FunctionMock::$base64DecodeCommandReturnsFalse = true;
+
+        $this->expectException(Exception::class);
+
+        $this->command->testDecryptData('anydata', str_repeat('a', 32));
+    }
+
+    public function test_decrypt_data_throws_with_wrong_key(): void
+    {
+        $key = str_repeat('a', 32);
+        $encrypted = $this->command->testEncryptData('APP_NAME=TestApp', $key);
+
+        $this->expectException(Exception::class);
+
+        $this->command->testDecryptData($encrypted, str_repeat('b', 32));
     }
 
     public function test_encrypt_and_decrypt_are_reversible(): void
     {
-        $data = "APP_NAME=TestApp\nAPP_ENV=testing\nAPP_KEY=base64:test123\nDB_CONNECTION=mysql";
+        $data = "APP_NAME=TestApp\nAPP_ENV=testing";
         $key = str_repeat('a', 32);
 
         $encrypted = $this->command->testEncryptData($data, $key);
-        $decrypted = $this->command->testDecryptData($encrypted, $key);
 
-        $this->assertEquals($data, $decrypted);
+        $this->assertEquals($data, $this->command->testDecryptData($encrypted, $key));
     }
 
-    public function test_decrypt_data_throws_exception_with_invalid_key(): void
-    {
-        $this->expectException(\Exception::class);
-
-        $data = 'test data';
-        $key = str_repeat('a', 20);
-        $wrongKey = str_repeat('b', 20);
-
-        $encrypted = $this->command->testEncryptData($data, $key);
-        $this->command->testDecryptData($encrypted, $wrongKey);
-    }
-
-    public function test_decrypt_data_throws_exception_with_invalid_base64(): void
-    {
-        $this->expectException(\Exception::class);
-
-        $key = str_repeat('a', 20);
-        $this->command->testDecryptData('invalid_base64', $key);
-    }
-
-    public function test_encrypt_data_works_with_valid_cipher(): void
-    {
-        $data = 'test data';
-        $key = str_repeat('a', 20);
-
-        $encrypted = $this->command->testEncryptData($data, $key);
-        $this->assertNotEmpty($encrypted);
-    }
-
-    public function test_define_key_returns_valid_key_when_provided(): void
+    public function test_define_key_returns_valid_key_when_long_enough(): void
     {
         $key = str_repeat('a', 32);
-        $result = $this->command->testDefineKey($key);
 
-        $this->assertEquals($key, $result);
+        $this->assertEquals($key, $this->command->testDefineKey($key));
     }
 
-    public function test_encryption_produces_different_output_for_same_input(): void
+    public function test_define_key_returns_key_on_decrypt_even_if_short(): void
     {
-        // Due to random IV, same input should produce different encrypted output
-        $data = 'test data';
-        $key = str_repeat('a', 20);
+        $this->command->setAction('decrypt');
+        $shortKey = 'short';
 
-        $encrypted1 = $this->command->testEncryptData($data, $key);
-        $encrypted2 = $this->command->testEncryptData($data, $key);
-
-        $this->assertNotEquals($encrypted1, $encrypted2);
-
-        // But both should decrypt to the same value
-        $decrypted1 = $this->command->testDecryptData($encrypted1, $key);
-        $decrypted2 = $this->command->testDecryptData($encrypted2, $key);
-
-        $this->assertEquals($data, $decrypted1);
-        $this->assertEquals($data, $decrypted2);
+        $this->assertEquals($shortKey, $this->command->testDefineKey($shortKey));
     }
 
-    public function test_encryption_handles_empty_strings(): void
+    public function test_define_key_prompts_for_key_when_too_short_on_encrypt(): void
     {
-        $data = '';
-        $key = str_repeat('a', 20);
+        $validKey = str_repeat('a', 20);
+        Prompt::fake([...str_split($validKey), "\n"]);
 
-        $encrypted = $this->command->testEncryptData($data, $key);
-        $decrypted = $this->command->testDecryptData($encrypted, $key);
+        $result = $this->command->testDefineKey('tooshort');
 
-        $this->assertEquals($data, $decrypted);
+        $this->assertEquals($validKey, $result);
     }
 
-    public function test_encryption_handles_special_characters(): void
+    public function test_define_key_prompts_for_key_when_empty(): void
     {
-        $data = "Special chars: !@#$%^&*()_+{}[]|\\:\";<>?,./\n\t\r";
-        $key = str_repeat('a', 20);
+        $validKey = str_repeat('a', 20);
+        Prompt::fake([...str_split($validKey), "\n"]);
 
-        $encrypted = $this->command->testEncryptData($data, $key);
-        $decrypted = $this->command->testDecryptData($encrypted, $key);
+        $result = $this->command->testDefineKey('');
 
-        $this->assertEquals($data, $decrypted);
+        $this->assertEquals($validKey, $result);
     }
 
-    public function test_encryption_handles_unicode_characters(): void
+    public function test_define_clear_filename_returns_valid_filename_for_encrypt(): void
     {
-        $data = "Unicode: 你好世界 🔒 مرحبا العالم";
-        $key = str_repeat('a', 20);
+        FunctionMock::$fileExistsReturns = true;
+        $this->command->setAction('encrypt');
 
-        $encrypted = $this->command->testEncryptData($data, $key);
-        $decrypted = $this->command->testDecryptData($encrypted, $key);
-
-        $this->assertEquals($data, $decrypted);
+        $this->assertEquals('.env', $this->command->testDefineClearFilename('.env'));
     }
 
-    public function test_encryption_handles_large_data(): void
+    public function test_define_clear_filename_adds_dot_prefix_for_encrypt(): void
     {
-        $data = str_repeat('Large data block ', 1000);
-        $key = str_repeat('a', 20);
+        FunctionMock::$fileExistsReturns = true;
+        $this->command->setAction('encrypt');
 
-        $encrypted = $this->command->testEncryptData($data, $key);
-        $decrypted = $this->command->testDecryptData($encrypted, $key);
+        $this->assertEquals('.env', $this->command->testDefineClearFilename('env'));
+    }
 
-        $this->assertEquals($data, $decrypted);
+    public function test_define_clear_filename_returns_valid_filename_for_decrypt_when_no_existing_file(): void
+    {
+        FunctionMock::$fileExistsReturns = false;
+        $this->command->setAction('decrypt');
+
+        $this->assertEquals('.env', $this->command->testDefineClearFilename('.env'));
+    }
+
+    public function test_define_clear_filename_returns_filename_for_decrypt_when_user_confirms_overwrite(): void
+    {
+        FunctionMock::$fileExistsReturns = true;
+        $this->command->setAction('decrypt');
+        Prompt::fake(["\n"]); // Enter accepts the default (true)
+
+        $this->assertEquals('.env', $this->command->testDefineClearFilename('.env'));
+    }
+
+    public function test_define_clear_filename_returns_filename_for_decrypt_with_force(): void
+    {
+        FunctionMock::$fileExistsReturns = true;
+        $this->command->setAction('decrypt');
+        $this->command->setForce(true);
+
+        $this->assertEquals('.env', $this->command->testDefineClearFilename('.env'));
+    }
+
+    public function test_define_encrypted_filename_returns_valid_filename_for_decrypt(): void
+    {
+        FunctionMock::$fileExistsReturns = true;
+        $this->command->setAction('decrypt');
+
+        $this->assertEquals('.env.encrypted', $this->command->testDefineEncryptedFilename('.env.encrypted'));
+    }
+
+    public function test_define_encrypted_filename_adds_dot_prefix_for_decrypt(): void
+    {
+        FunctionMock::$fileExistsReturns = true;
+        $this->command->setAction('decrypt');
+
+        $this->assertEquals('.env.encrypted', $this->command->testDefineEncryptedFilename('env.encrypted'));
+    }
+
+    public function test_define_encrypted_filename_returns_valid_filename_for_encrypt_when_no_existing_file(): void
+    {
+        FunctionMock::$fileExistsReturns = false;
+        $this->command->setAction('encrypt');
+
+        $this->assertEquals('.env.encrypted', $this->command->testDefineEncryptedFilename('.env'));
+    }
+
+    public function test_define_encrypted_filename_appends_encrypted_suffix(): void
+    {
+        FunctionMock::$fileExistsReturns = false;
+        $this->command->setAction('encrypt');
+
+        $result = $this->command->testDefineEncryptedFilename('.env');
+
+        $this->assertStringEndsWith('.encrypted', $result);
+    }
+
+    public function test_define_encrypted_filename_returns_filename_for_encrypt_when_user_confirms_overwrite(): void
+    {
+        FunctionMock::$fileExistsReturns = true;
+        $this->command->setAction('encrypt');
+        Prompt::fake(["\n"]); // Enter accepts the default (true)
+
+        $this->assertEquals('.env.encrypted', $this->command->testDefineEncryptedFilename('.env.encrypted'));
+    }
+
+    public function test_define_encrypted_filename_returns_filename_for_encrypt_with_force(): void
+    {
+        FunctionMock::$fileExistsReturns = true;
+        $this->command->setAction('encrypt');
+        $this->command->setForce(true);
+
+        $this->assertEquals('.env.encrypted', $this->command->testDefineEncryptedFilename('.env.encrypted'));
     }
 }

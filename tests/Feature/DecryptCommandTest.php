@@ -2,7 +2,9 @@
 
 namespace Jashaics\EnvEncrypter\Tests\Feature;
 
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
+use Jashaics\EnvEncrypter\Tests\Helpers\FunctionMock;
 use Jashaics\EnvEncrypter\Tests\TestCase;
 
 class DecryptCommandTest extends TestCase
@@ -41,6 +43,8 @@ class DecryptCommandTest extends TestCase
 
     protected function tearDown(): void
     {
+        FunctionMock::reset();
+
         // Clean up test files
         if (File::exists(self::NAME)) {
             File::delete(self::NAME);
@@ -110,6 +114,26 @@ class DecryptCommandTest extends TestCase
 
         $this->assertTrue(File::exists(self::DECRYPTED_NAME));
         $this->assertStringContainsString('APP_NAME=TestApp', File::get(self::DECRYPTED_NAME));
+    }
+
+    public function test_decrypt_command_fails_when_destination_write_fails(): void
+    {
+        $this->app->instance('files', new class extends \Illuminate\Filesystem\Filesystem {
+            public function put($path, $contents, $lock = false): int|false
+            {
+                return false;
+            }
+        });
+        \Illuminate\Support\Facades\File::clearResolvedInstance('files');
+
+        $command = $this->artisan('env-encrypter:decrypt', [
+            '--source' => self::ENCRYPTED_NAME,
+            '--destination' => self::NAME,
+            '--key' => $this->key,
+            '--force' => true,
+            '--quiet' => true,
+        ]);
+        $command->assertExitCode(Command::FAILURE);
     }
 
     public function test_decrypt_with_wrong_key_fails(): void

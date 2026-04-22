@@ -2,7 +2,9 @@
 
 namespace Jashaics\EnvEncrypter\Tests\Feature;
 
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
+use Jashaics\EnvEncrypter\Tests\Helpers\FunctionMock;
 use Jashaics\EnvEncrypter\Tests\TestCase;
 
 class EncryptCommandTest extends TestCase
@@ -25,6 +27,8 @@ class EncryptCommandTest extends TestCase
 
     protected function tearDown(): void
     {
+        FunctionMock::reset();
+
         // Clean up test files
         File::delete(self::NAME);
         if (File::exists(self::ENCRYPTED_NAME)) {
@@ -105,5 +109,57 @@ class EncryptCommandTest extends TestCase
 
         // Verify content matches
         $this->assertEquals($originalContent, File::get(self::NAME));
+    }
+
+    public function test_encrypt_command_handles_existing_backup_file(): void
+    {
+        // Create an existing backup file to force the while loop to iterate (covers line 89)
+        File::put(self::NAME.'.backup', 'existing backup placeholder');
+
+        $command = $this->artisan('env-encrypter:encrypt', [
+            '--source' => self::NAME,
+            '--destination' => self::ENCRYPTED_NAME,
+            '--key' => $this->key,
+            '--quiet' => true,
+        ]);
+        $command->assertExitCode(Command::SUCCESS);
+    }
+
+    public function test_encrypt_command_fails_when_writes_fail(): void
+    {
+        // Mock all File::put calls to fail, covering the backup-write-fail branch (lines 94-95)
+        // and the destination-write-fail branch (lines 110-112) in a single test.
+        $this->app->instance('files', new class extends \Illuminate\Filesystem\Filesystem {
+            public function put($path, $contents, $lock = false): int|false
+            {
+                return false;
+            }
+        });
+        \Illuminate\Support\Facades\File::clearResolvedInstance('files');
+
+        $command = $this->artisan('env-encrypter:encrypt', [
+            '--source' => self::NAME,
+            '--destination' => self::ENCRYPTED_NAME,
+            '--key' => $this->key,
+            '--force' => true,
+            '--quiet' => true,
+        ]);
+        $command->assertExitCode(Command::FAILURE);
+    }
+
+    public function test_encrypt_command_fails_when_encryption_throws(): void
+    {
+        // Force openssl_cipher_iv_length to return false so encryptData throws,
+        // covering the catch block (lines 102-104) in Encrypt::handle.
+        FunctionMock::$opensslCipherIvLengthCommandReturnsFalse = true;
+
+        $command = $this->artisan('env-encrypter:encrypt', [
+            '--source' => self::NAME,
+            '--destination' => self::ENCRYPTED_NAME,
+            '--key' => $this->key,
+            '--force' => true,
+            '--quiet' => true,
+        ]);
+        $command->assertExitCode(Command::FAILURE);
     }
 }

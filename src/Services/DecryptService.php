@@ -23,7 +23,7 @@ class DecryptService
             throw new Exception('Errore nella lettura del vettore di inizializzazione');
         }
         $encryptedData = base64_decode($encryptedData);
-        if (false == $encryptedData) {
+        if (false === $encryptedData) {
             http_response_code(409);
             throw new Exception('Errore nella decodifica base64 dei dati');
         }

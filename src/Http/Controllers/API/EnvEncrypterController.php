@@ -2,9 +2,8 @@
 
 namespace Jashaics\EnvEncrypter\Http\Controllers\API;
 
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
 use Exception;
-use InvalidArgumentException;
 use Jashaics\EnvEncrypter\Services\DecryptService;
 
 class EnvEncrypterController extends Controller
@@ -26,7 +25,7 @@ class EnvEncrypterController extends Controller
 
             if (!is_string($_POST['source']) || !is_string($_POST['destination']) || !is_string($_POST['key'])) {
                 http_response_code(400);
-                throw new InvalidArgumentException('I parametri devono essere stringhe');
+                throw new Exception('I parametri devono essere stringhe');
             }
 
             $source = $_POST['source'];
@@ -84,8 +83,16 @@ class EnvEncrypterController extends Controller
                 'code' => $e->getCode(),
                 'http_code' => $httpCode ?: 500
             ]);
-            exit(1);
+            $this->terminate(1);
         }
     }
+
+    // @codeCoverageIgnoreStart
+    // exit() cannot be covered without actually exiting the test process, so we ignore this method in code coverage reports
+    protected function terminate(int $code): void
+    {
+        exit($code);
+    }
+    // @codeCoverageIgnoreEnd
 
 }

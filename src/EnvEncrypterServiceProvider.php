@@ -13,10 +13,10 @@ class EnvEncrypterServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        /*
-         * Optional methods to load your package assets
-         */
+        // Optional methods to load your package assets
         $this->loadTranslationsFrom(__DIR__.'/../lang', 'env-encrypter');
+
+        $this->loadRoutesFrom(__DIR__.'/../routes/api.php');
 
         if ($this->app->runningInConsole()) {
             $this->commands([

@@ -90,7 +90,7 @@ class Decrypt extends Command
 
         // encrypting content: if everything works fine deleting backup
         $success = File::put($destinationfilename, $decryptedData, true);
-        if(false === $success){
+        if (false === $success) {
             $message = __('env-encrypter::errors.file_write_fail', ['name' => $destinationfilename]);
             error(is_string($message) ? $message : 'Failed to write file');
             return Command::FAILURE;

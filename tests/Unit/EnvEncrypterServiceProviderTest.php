@@ -4,7 +4,7 @@ namespace Jashaics\EnvEncrypter\Tests\Unit;
 
 use Illuminate\Support\Facades\Artisan;
 use Jashaics\EnvEncrypter\EnvEncrypterServiceProvider;
-use Tests\TestCase;
+use Jashaics\EnvEncrypter\Tests\TestCase;
 
 class EnvEncrypterServiceProviderTest extends TestCase
 {

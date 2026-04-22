@@ -250,7 +250,7 @@ trait EncryptionTrait
         $cipher = 'aes-256-cbc';
 
         $ivlen = openssl_cipher_iv_length($cipher);
-        if(false == $ivlen){
+        if (false == $ivlen) {
             throw new Exception(trans('env-encrypter::errors.invalid_iv_length'));
         }
         $iv = openssl_random_pseudo_bytes($ivlen);
@@ -273,13 +273,13 @@ trait EncryptionTrait
 
         $ivlen = openssl_cipher_iv_length($cipher);
 
-        if(false == $ivlen){
+        if (false == $ivlen) {
             throw new Exception(trans('env-encrypter::errors.invalid_iv_length'));
         }
 
         $base64EncryptedData = base64_decode($encryptedData);
 
-        if(false == $base64EncryptedData){
+        if (false == $base64EncryptedData) {
             throw new Exception(trans('env-encrypter::errors.invalid_base64'));
         }
 
@@ -289,7 +289,7 @@ trait EncryptionTrait
 
         $decrypted = openssl_decrypt($EncryptedContent, $cipher, base64_encode($key), 0, $iv);
 
-        if(false === $decrypted){
+        if (false === $decrypted) {
             throw new Exception((string) trans('env-encrypter::errors.decryption_fail'));
         }
 

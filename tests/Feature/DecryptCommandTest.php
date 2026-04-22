@@ -2,8 +2,10 @@
 
 namespace Jashaics\EnvEncrypter\Tests\Feature;
 
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
-use Tests\TestCase;
+use Jashaics\EnvEncrypter\Tests\Helpers\FunctionMock;
+use Jashaics\EnvEncrypter\Tests\TestCase;
 
 class DecryptCommandTest extends TestCase
 {
@@ -41,6 +43,8 @@ class DecryptCommandTest extends TestCase
 
     protected function tearDown(): void
     {
+        FunctionMock::reset();
+
         // Clean up test files
         if (File::exists(self::NAME)) {
             File::delete(self::NAME);
@@ -112,6 +116,26 @@ class DecryptCommandTest extends TestCase
         $this->assertStringContainsString('APP_NAME=TestApp', File::get(self::DECRYPTED_NAME));
     }
 
+    public function test_decrypt_command_fails_when_destination_write_fails(): void
+    {
+        $this->app->instance('files', new class extends \Illuminate\Filesystem\Filesystem {
+            public function put($path, $contents, $lock = false): int|false
+            {
+                return false;
+            }
+        });
+        \Illuminate\Support\Facades\File::clearResolvedInstance('files');
+
+        $command = $this->artisan('env-encrypter:decrypt', [
+            '--source' => self::ENCRYPTED_NAME,
+            '--destination' => self::NAME,
+            '--key' => $this->key,
+            '--force' => true,
+            '--quiet' => true,
+        ]);
+        $command->assertExitCode(Command::FAILURE);
+    }
+
     public function test_decrypt_with_wrong_key_fails(): void
     {
         $this->assertTrue(File::exists(self::ENCRYPTED_NAME));
@@ -127,5 +151,28 @@ class DecryptCommandTest extends TestCase
             '--quiet' => true,
         ]);
         $command->assertExitCode(1);
+    }
+
+    public function test_decrypt_command_prompts_for_source_when_not_provided(): void
+    {
+        $this->artisan('env-encrypter:decrypt', [
+            '--destination' => self::NAME,
+            '--key' => $this->key,
+            '--force' => true,
+        ])
+            ->expectsQuestion('What is the name of the file to decrypt? ', self::ENCRYPTED_NAME)
+            ->assertExitCode(Command::SUCCESS);
+    }
+
+    public function test_decrypt_command_prompts_for_destination_when_not_provided(): void
+    {
+        File::delete(self::NAME);
+
+        $this->artisan('env-encrypter:decrypt', [
+            '--source' => self::ENCRYPTED_NAME,
+            '--key' => $this->key,
+        ])
+            ->expectsQuestion('Set decrypted file name', self::NAME)
+            ->assertExitCode(Command::SUCCESS);
     }
 }

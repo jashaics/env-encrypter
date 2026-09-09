@@ -1,3 +1,10 @@
+# [2.3.0](https://github.com/jashaics/env-encrypter/compare/v2.2.0...v2.3.0) (2026-09-09)
+
+
+### Features
+
+* surface env-encrypter-addendum as a Composer suggestion ([a8de7e2](https://github.com/jashaics/env-encrypter/commit/a8de7e2bb1d79829b3cecab881b27e414fb6e576))
+
 # [2.2.0](https://github.com/jashaics/env-encrypter/compare/v2.1.0...v2.2.0) (2026-04-22)
 
 

@@ -69,5 +69,8 @@
         "larastan/larastan": "^2.0",
         "orchestra/testbench": "^9.0|^10.0",
         "phpunit/phpunit": "^11.0|^12.0"
+    },
+    "suggest": {
+        "jashaics/env-encrypter-addendum": "Standalone bash/OpenSSL scripts to encrypt/decrypt .env files outside of a Laravel/Composer context (e.g. on servers or in non-PHP projects). See https://github.com/jashaics/env-encrypter-addendum"
     }
 }

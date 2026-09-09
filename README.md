@@ -44,3 +44,7 @@ To encrypt your .env file run
 To decrypt an encrypted .env file (`.env.encrypted`) run
 
 ```php artisan env-encrypter:decrypt``` then follow the instructions
+
+## Related projects
+
+- [jashaics/env-encrypter-addendum](https://github.com/jashaics/env-encrypter-addendum) — standalone, interactive bash/OpenSSL scripts that do the same encrypt/decrypt job outside of a Laravel/Composer context (e.g. on a bare server, in a CI step, or in a non-PHP project). Same idea, no Composer/Laravel dependency required. `composer require`/`composer update` on this package will also surface it as a suggested package.
